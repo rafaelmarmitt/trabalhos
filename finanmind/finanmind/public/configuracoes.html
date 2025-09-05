@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinanMind | Configurações</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Poppins:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="shortcut icon" href="aumentar.png" type="image/x-icon">
+    <style>
+        /* Estilos Gerais */
+        :root {
+            --primary: #2a4b8d;
+            --secondary: #4e7ae6;
+            --accent: #7e6cca;
+            --success: #36b37e;
+            --warning: #ffab00;
+            --danger: #ff5630;
+            --light: #f9fafc;
+            --dark: #212b36;
+            --gray: #637381;
+            --bg-light: #f5f7fa;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            display: flex;
+            color: var(--dark);
+        }
+
+        .sidebar {
+            width: 260px;
+            background-color: var(--light);
+            padding: 20px;
+            height: 100vh;
+            position: fixed;
+            border-right: 1px solid #e0e0e0;
+        }
+
+        .sidebar .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .sidebar .menu a {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            color: var(--gray);
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .sidebar .menu a.active {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        .sidebar .menu a:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .sidebar .menu a i {
+            margin-right: 15px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .main-content {
+            margin-left: 260px;
+            padding: 30px;
+            width: calc(100% - 260px);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-actions .user-profile {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .header-actions .user-profile img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .card {
+            background-color: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            font-weight: 500;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .form-footer {
+            text-align: right;
+            margin-top: 20px;
+        }
+
+        /* Estilos específicos */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .categories-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .categories-table th,
+        .categories-table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+        }
+
+        .action-buttons button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-right: 10px;
+            font-size: 16px;
+        }
+
+        .action-buttons .edit-btn {
+            color: var(--secondary);
+        }
+
+        .action-buttons .delete-btn {
+            color: var(--danger);
+        }
+
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--success);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: none;
+            z-index: 2000;
+        }
+
+        .notification.error {
+            background-color: var(--danger);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--secondary);
+            color: var(--secondary);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        /* Variáveis para modo escuro */
+        [data-theme="dark"] {
+            --bg-light: #1a1a1a;
+            --light: #2d2d2d;
+            --dark: #f5f5f5;
+            --gray: #a0a0a0;
+        }
+
+        [data-theme="dark"] body {
+            background-color: var(--bg-light);
+            color: var(--dark);
+        }
+
+        [data-theme="dark"] .card {
+            background-color: #2d2d2d;
+            color: var(--dark);
+        }
+
+        [data-theme="dark"] .sidebar {
+            background-color: #252525;
+            border-right: 1px solid #444;
+        }
+
+        [data-theme="dark"] .sidebar .menu a {
+            color: var(--gray);
+        }
+
+        [data-theme="dark"] .sidebar .menu a.active,
+        [data-theme="dark"] .sidebar .menu a:hover {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        [data-theme="dark"] input,
+        [data-theme="dark"] select {
+            background-color: #3d3d3d;
+            color: var(--dark);
+            border-color: #555;
+        }
+
+        /* Correções para modo escuro nos modais e gráficos */
+        [data-theme="dark"] .modal-content {
+            background-color: #2d2d2d;
+            color: var(--dark);
+        }
+
+        [data-theme="dark"] .modal-header {
+            border-bottom: 1px solid #444;
+        }
+
+        [data-theme="dark"] .close-button {
+            color: #aaa;
+        }
+
+        [data-theme="dark"] .close-button:hover {
+            color: #fff;
+        }
+
+        /* Ajustes para gráficos no modo escuro */
+        [data-theme="dark"] .chartjs-render-monitor {
+            filter: invert(90%) hue-rotate(180deg);
+        }
+
+        /* Ajustes específicos para textos dentro dos gráficos */
+        [data-theme="dark"] .chartjs-grid,
+        [data-theme="dark"] .chartjs-scale,
+        [data-theme="dark"] .chartjs-legend {
+            color: rgba(255, 255, 255, 0.8) !important;
+            fill: rgba(255, 255, 255, 0.8) !important;
+        }
+
+        /* Ajustes para as tabelas no modo escuro */
+        [data-theme="dark"] table {
+            color: var(--dark);
+        }
+
+        [data-theme="dark"] .transactions-table th {
+            background-color: #3d3d3d;
+            color: var(--dark);
+        }
+
+        [data-theme="dark"] .transactions-table td {
+            border-bottom: 1px solid #444;
+        }
+    </style>
+</head>
+
+<body>
+    <aside class="sidebar">
+        <div class="logo">FinanMind</div>
+        <nav class="menu">
+            <a href="dashboard.html"><i class="fas fa-chart-pie"></i> Dashboard</a>
+            <a href="transacoes.html"><i class="fas fa-exchange-alt"></i> Transações</a>
+            <a href="investimentos.html"><i class="fas fa-chart-line"></i> Investimentos</a>
+            <a href="metas.html"><i class="fas fa-tasks"></i> Metas</a>
+            <a href="relatorios.html"><i class="fas fa-file-alt"></i> Relatórios</a>
+            <a href="configuracoes.html" class="active"><i class="fas fa-cog"></i> Configurações</a>
+            <a href="#" id="logout-button"><i class="fas fa-sign-out-alt"></i> Sair</a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <header>
+            <h1>Configurações da Conta</h1>
+            <div class="header-actions">
+                <button id="theme-toggle" class="btn btn-outline" style="margin-left: 15px;">
+                    <i class="fas fa-moon"></i> Modo Escuro
+                </button>
+                <div class="user-profile">
+                    <img src="https://i.pravatar.cc/150?u=a042581f4e29026704d" alt="User">
+                    <span id="user-name">Usuário</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="settings-grid">
+            <div class="card">
+                <h2>Perfil</h2>
+                <form id="profile-form">
+                    <div class="form-group">
+                        <label for="name">Nome</label>
+                        <input type="text" id="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" required>
+                    </div>
+                    <div class="form-footer">
+                        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                    </div>
+                </form>
+            </div>
+            <div class="card">
+                <h2>Alterar Senha</h2>
+                <form id="password-form">
+                    <div class="form-group">
+                        <label for="current-password">Senha Atual</label>
+                        <input type="password" id="current-password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="new-password">Nova Senha</label>
+                        <input type="password" id="new-password" required>
+                    </div>
+                    <div class="form-footer">
+                        <button type="submit" class="btn btn-primary">Alterar Senha</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Gerenciar Categorias</h2>
+            <table class="categories-table">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Tipo</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="categories-tbody">
+                    <!-- Categorias carregadas aqui -->
+                </tbody>
+            </table>
+            <form id="category-form" style="margin-top: 20px; display: flex; gap: 15px;">
+                <input type="text" id="category-name" placeholder="Nome da Categoria" required
+                    style="flex-grow: 1; padding: 10px; border-radius: 8px; border: 1px solid #ccc;">
+                <select id="category-type" required style="padding: 10px; border-radius: 8px; border: 1px solid #ccc;">
+                    <option value="income">Receita</option>
+                    <option value="expense">Despesa</option>
+                    <option value="investment">Investimento</option>
+                </select>
+                <button type="submit" class="btn btn-primary">Adicionar</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>Zona de Perigo</h2>
+            <p>A exclusão da sua conta é uma ação permanente e não pode ser desfeita.</p>
+            <div class="form-footer">
+                <button id="delete-account-btn" class="btn btn-danger">Excluir Minha Conta</button>
+            </div>
+        </div>
+
+        <div id="notification" class="notification"></div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                window.location.href = './login.html';
+                return;
+            }
+
+            const userName = localStorage.getItem('userName');
+            if (userName) document.getElementById('user-name').textContent = userName;
+
+            // --- Funções de Notificação ---
+            const notification = document.getElementById('notification');
+            const showNotification = (message, isError = false) => {
+                notification.textContent = message;
+                notification.className = 'notification';
+                if (isError) {
+                    notification.classList.add('error');
+                }
+                notification.style.display = 'block';
+                setTimeout(() => {
+                    notification.style.display = 'none';
+                }, 3000);
+            };
+
+            // --- Carregar Dados do Perfil ---
+            const loadProfile = async () => {
+                try {
+                    // NOTA: A rota /api/user/profile precisa ser criada no backend
+                    const response = await fetch('/api/user/profile', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!response.ok) throw new Error('Erro ao carregar perfil.');
+                    const user = await response.json();
+                    document.getElementById('name').value = user.name;
+                    document.getElementById('email').value = user.email;
+                } catch (error) {
+                    showNotification(error.message, true);
+                }
+            };
+
+            // --- Atualizar Perfil ---
+            document.getElementById('profile-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const name = document.getElementById('name').value;
+                const email = document.getElementById('email').value;
+                try {
+                    // NOTA: A rota /api/user/profile (PUT) precisa ser criada no backend
+                    const response = await fetch('/api/user/profile', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify({ name, email })
+                    });
+                    if (!response.ok) {
+                        const err = await response.json();
+                        throw new Error(err.error || 'Falha ao atualizar perfil.');
+                    }
+                    localStorage.setItem('userName', name);
+                    document.getElementById('user-name').textContent = name;
+                    showNotification('Perfil atualizado com sucesso!');
+                } catch (error) {
+                    showNotification(error.message, true);
+                }
+            });
+
+            // --- Alterar Senha ---
+            document.getElementById('password-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const currentPassword = document.getElementById('current-password').value;
+                const newPassword = document.getElementById('new-password').value;
+                try {
+                    // NOTA: A rota /api/user/password (PUT) precisa ser criada no backend
+                    const response = await fetch('/api/user/password', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify({ currentPassword, newPassword })
+                    });
+                    if (!response.ok) {
+                        const err = await response.json();
+                        throw new Error(err.error || 'Falha ao alterar senha.');
+                    }
+                    showNotification('Senha alterada com sucesso!');
+                    e.target.reset();
+                } catch (error) {
+                    showNotification(error.message, true);
+                }
+            });
+
+            // --- Gerenciamento de Categorias ---
+            const categoriesTbody = document.getElementById('categories-tbody');
+            const loadCategories = async () => {
+                try {
+                    const response = await fetch('/api/categories', { headers: { 'Authorization': `Bearer ${token}` } });
+                    const categories = await response.json();
+                    categoriesTbody.innerHTML = '';
+                    categories.forEach(cat => {
+                        const row = `
+                            <tr>
+                                <td>${cat.name}</td>
+                                <td>${cat.type}</td>
+                                <td class="action-buttons">
+                                    <button class="delete-btn" data-id="${cat.id}"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                        `;
+                        categoriesTbody.innerHTML += row;
+                    });
+                } catch (error) {
+                    showNotification('Erro ao carregar categorias.', true);
+                }
+            };
+
+            document.getElementById('category-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const name = document.getElementById('category-name').value;
+                const type = document.getElementById('category-type').value;
+                try {
+                    const response = await fetch('/api/categories', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify({ name, type })
+                    });
+                    if (!response.ok) throw new Error('Falha ao criar categoria.');
+                    showNotification('Categoria criada com sucesso!');
+                    e.target.reset();
+                    loadCategories();
+                } catch (error) {
+                    showNotification(error.message, true);
+                }
+            });
+
+            categoriesTbody.addEventListener('click', async (e) => {
+                const deleteBtn = e.target.closest('.delete-btn');
+                if (deleteBtn) {
+                    const id = deleteBtn.dataset.id;
+                    if (confirm('Tem certeza? Excluir uma categoria pode afetar transações existentes.')) {
+                        try {
+                            await fetch(`/api/categories/${id}`, {
+                                method: 'DELETE',
+                                headers: { 'Authorization': `Bearer ${token}` }
+                            });
+                            showNotification('Categoria excluída.');
+                            loadCategories();
+                        } catch (error) {
+                            showNotification('Erro ao excluir categoria.', true);
+                        }
+                    }
+                }
+            });
+
+            // --- Excluir Conta ---
+            document.getElementById('delete-account-btn').addEventListener('click', async () => {
+                if (confirm('ATENÇÃO: Esta ação é irreversível. Todos os seus dados serão perdidos. Deseja continuar?')) {
+                    try {
+                        // NOTA: A rota /api/user/profile (DELETE) precisa ser criada no backend
+                        const response = await fetch('/api/user/profile', {
+                            method: 'DELETE',
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        if (!response.ok) throw new Error('Falha ao excluir conta.');
+
+                        alert('Sua conta foi excluída com sucesso.');
+                        logout();
+                    } catch (error) {
+                        showNotification(error.message, true);
+                    }
+                }
+            });
+
+            // --- Logout ---
+            const logout = () => {
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('userName');
+                window.location.href = './login.html';
+            };
+            document.getElementById('logout-button').addEventListener('click', logout);
+
+            // --- Carga Inicial ---
+            loadProfile();
+            loadCategories();
+        });
+        // Gerenciamento do tema escuro
+        document.addEventListener('DOMContentLoaded', function () {
+            const themeToggleBtn = document.getElementById('theme-toggle');
+            const themeIcon = themeToggleBtn.querySelector('i');
+
+            // Verificar preferência salva ou preferência do sistema
+            const savedTheme = localStorage.getItem('theme');
+            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const currentTheme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
+
+            // Aplicar tema
+            if (currentTheme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+                themeToggleBtn.innerHTML = '<i class="fas fa-sun"></i> Modo Claro';
+            }
+
+            // Alternar tema
+            themeToggleBtn.addEventListener('click', function () {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+
+                if (currentTheme === 'dark') {
+                    document.documentElement.removeAttribute('data-theme');
+                    localStorage.setItem('theme', 'light');
+                    themeIcon.classList.remove('fa-sun');
+                    themeIcon.classList.add('fa-moon');
+                    themeToggleBtn.innerHTML = '<i class="fas fa-moon"></i> Modo Escuro';
+                } else {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                    themeIcon.classList.remove('fa-moon');
+                    themeIcon.classList.add('fa-sun');
+                    themeToggleBtn.innerHTML = '<i class="fas fa-sun"></i> Modo Claro';
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

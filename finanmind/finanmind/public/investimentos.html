@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinanMind | Meus Investimentos</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Poppins:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="shortcut icon" href="aumentar.png" type="image/x-icon">
+    <style>
+        :root {
+            --primary: #2a4b8d;
+            --secondary: #4e7ae6;
+            --accent: #7e6cca;
+            --success: #36b37e;
+            --warning: #ffab00;
+            --danger: #ff5630;
+            --light: #f9fafc;
+            --dark: #212b36;
+            --gray: #637381;
+            --bg-light: #f5f7fa;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            display: flex;
+            color: var(--dark);
+        }
+
+        .sidebar {
+            width: 260px;
+            background-color: var(--light);
+            padding: 20px;
+            height: 100vh;
+            position: fixed;
+            border-right: 1px solid #e0e0e0;
+        }
+
+        .sidebar .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .sidebar .menu a {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            color: var(--gray);
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .sidebar .menu a.active {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        .sidebar .menu a:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .sidebar .menu a i {
+            margin-right: 15px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .main-content {
+            margin-left: 260px;
+            padding: 30px;
+            width: calc(100% - 260px);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-actions .user-profile {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .header-actions .user-profile img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .card {
+            background-color: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        .btn-secondary {
+            background-color: #e0e0e0;
+            color: var(--dark);
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        /* Summary Cards */
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            text-align: center;
+        }
+
+        .summary-card h3 {
+            font-size: 1rem;
+            color: var(--gray);
+            margin-bottom: 5px;
+        }
+
+        .summary-card .value {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        /* Charts */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chart-container {
+            height: 300px;
+        }
+
+        /* Investments Table */
+        .investments-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .investments-table th,
+        .investments-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .investments-table th {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--gray);
+        }
+
+        .amount {
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-buttons button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .action-buttons .edit-btn {
+            color: var(--secondary);
+        }
+
+        .action-buttons .delete-btn {
+            color: var(--danger);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 30px;
+            border: 1px solid #888;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+        }
+
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            font-weight: 500;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .modal-footer {
+            text-align: right;
+            margin-top: 20px;
+        }
+
+        /* Loading */
+        #loading {
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
+
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--success);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: none;
+            z-index: 2000;
+        }
+
+        .notification.error {
+            background-color: var(--danger);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--secondary);
+            color: var(--secondary);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        /* Variáveis para modo escuro */
+        [data-theme="dark"] {
+            --bg-light: #1a1a1a;
+            --light: #2d2d2d;
+            --dark: #f5f5f5;
+            --gray: #a0a0a0;
+        }
+
+        [data-theme="dark"] body {
+            background-color: var(--bg-light);
+            color: var(--dark);
+        }
+
+        [data-theme="dark"] .card {
+            background-color: #2d2d2d;
+            color: var(--dark);
+        }
+
+        [data-theme="dark"] .sidebar {
+            background-color: #252525;
+            border-right: 1px solid #444;
+        }
+
+        [data-theme="dark"] .sidebar .menu a {
+            color: var(--gray);
+        }
+
+        [data-theme="dark"] .sidebar .menu a.active,
+        [data-theme="dark"] .sidebar .menu a:hover {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        [data-theme="dark"] input,
+        [data-theme="dark"] select {
+            background-color: #3d3d3d;
+            color: var(--dark);
+            border-color: #555;
+        }
+
+        /* Correções para modo escuro nos modais e gráficos */
+        [data-theme="dark"] .modal-content {
+            background-color: #2d2d2d;
+            color: var(--dark);
+        }
+
+        [data-theme="dark"] .modal-header {
+            border-bottom: 1px solid #444;
+        }
+
+        [data-theme="dark"] .close-button {
+            color: #aaa;
+        }
+
+        [data-theme="dark"] .close-button:hover {
+            color: #fff;
+        }
+
+        /* Ajustes para gráficos no modo escuro */
+        [data-theme="dark"] .chartjs-render-monitor {
+            filter: invert(90%) hue-rotate(180deg);
+        }
+
+        /* Ajustes específicos para textos dentro dos gráficos */
+        [data-theme="dark"] .chartjs-grid,
+        [data-theme="dark"] .chartjs-scale,
+        [data-theme="dark"] .chartjs-legend {
+            color: rgba(255, 255, 255, 0.8) !important;
+            fill: rgba(255, 255, 255, 0.8) !important;
+        }
+
+        /* Ajustes para as tabelas no modo escuro */
+        [data-theme="dark"] table {
+            color: var(--dark);
+        }
+
+        [data-theme="dark"] .transactions-table th {
+            background-color: #3d3d3d;
+            color: var(--dark);
+        }
+
+        [data-theme="dark"] .transactions-table td {
+            border-bottom: 1px solid #444;
+        }
+    </style>
+</head>
+
+<body>
+    <aside class="sidebar">
+        <div class="logo">FinanMind</div>
+        <nav class="menu">
+            <a href="dashboard.html"><i class="fas fa-chart-pie"></i> Dashboard</a>
+            <a href="transacoes.html"><i class="fas fa-exchange-alt"></i> Transações</a>
+            <a href="investimentos.html" class="active"><i class="fas fa-chart-line"></i> Investimentos</a>
+            <a href="metas.html"><i class="fas fa-tasks"></i> Metas</a>
+            <a href="relatorios.html"><i class="fas fa-file-alt"></i> Relatórios</a>
+            <a href="configuracoes.html"><i class="fas fa-cog"></i> Configurações</a>
+            <a href="#" id="logout-button"><i class="fas fa-sign-out-alt"></i> Sair</a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <header>
+            <h1>Meus Investimentos</h1>
+            <div class="header-actions">
+                <button id="theme-toggle" class="btn btn-outline" style="margin-left: 15px;">
+                    <i class="fas fa-moon"></i> Modo Escuro
+                </button>
+                <button id="add-investment-btn" class="btn btn-primary"><i class="fas fa-plus"></i> Novo
+                    Investimento</button>
+                <div class="user-profile">
+                    <img src="https://i.pravatar.cc/150?u=a042581f4e29026704d" alt="User">
+                    <span id="user-name">Usuário</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="summary-cards">
+            <div class="card summary-card">
+                <h3>Total Investido</h3>
+                <p id="total-invested" class="value">R$ 0,00</p>
+            </div>
+            <div class="card summary-card">
+                <h3>Total de Investimentos</h3>
+                <p id="total-investments" class="value">0</p>
+            </div>
+            <div class="card summary-card">
+                <h3>Maior Investimento</h3>
+                <p id="largest-investment" class="value">R$ 0,00</p>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="card">
+                <h2>Distribuição por Categoria</h2>
+                <div class="chart-container">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+            <div class="card">
+                <h2>Evolução dos Investimentos</h2>
+                <div class="chart-container">
+                    <canvas id="timelineChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Lista de Investimentos</h2>
+            <table class="investments-table">
+                <thead>
+                    <tr>
+                        <th>Descrição</th>
+                        <th>Categoria</th>
+                        <th>Data</th>
+                        <th>Valor</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="investments-tbody">
+                    <!-- Investimentos serão inseridos aqui -->
+                </tbody>
+            </table>
+            <div id="loading">Carregando...</div>
+        </div>
+    </main>
+
+    <!-- Modal para Adicionar/Editar Investimento -->
+    <div id="investment-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Novo Investimento</h2>
+                <span class="close-button">&times;</span>
+            </div>
+            <form id="investment-form">
+                <input type="hidden" id="investment-id">
+                <div class="form-group">
+                    <label for="description">Descrição</label>
+                    <input type="text" id="description" required>
+                </div>
+                <div class="form-group">
+                    <label for="amount">Valor</label>
+                    <input type="number" id="amount" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="date">Data</label>
+                    <input type="date" id="date" required>
+                </div>
+                <div class="form-group">
+                    <label for="category">Categoria</label>
+                    <select id="category" required>
+                        <!-- Categorias serão carregadas aqui -->
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary close-button">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                window.location.href = './login.html';
+                return;
+            }
+
+            const userName = localStorage.getItem('userName');
+            if (userName) {
+                document.getElementById('user-name').textContent = userName;
+            }
+
+            const modal = document.getElementById('investment-modal');
+            const addInvestmentBtn = document.getElementById('add-investment-btn');
+            const closeButtons = document.querySelectorAll('.close-button');
+            const investmentForm = document.getElementById('investment-form');
+            const investmentsTbody = document.getElementById('investments-tbody');
+            const loadingDiv = document.getElementById('loading');
+            const notification = document.getElementById('notification');
+
+            let currentEditingId = null;
+            let categoryChartInstance = null;
+            let timelineChartInstance = null;
+
+            const formatCurrency = (value) => parseFloat(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            function formatDate(dateString) {
+                // Se a data já incluir informações de tempo, use diretamente
+                if (dateString.includes('T')) {
+                    const date = new Date(dateString);
+                    return date.toLocaleDateString('pt-BR');
+                }
+                // Se for apenas a data (YYYY-MM-DD), adicione o timezone corretamente
+                const date = new Date(dateString);
+                // Ajusta para o fuso horário local
+                const adjustedDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+                return adjustedDate.toLocaleDateString('pt-BR');
+            }
+
+            const showNotification = (message, isError = false) => {
+                notification.textContent = message;
+                notification.className = 'notification ' + (isError ? 'error' : 'success');
+                notification.style.display = 'block';
+
+                setTimeout(() => {
+                    notification.style.display = 'none';
+                }, 3000);
+            };
+
+            const fetchInvestments = async () => {
+                loadingDiv.style.display = 'block';
+                investmentsTbody.innerHTML = '';
+
+                try {
+                    const [investmentsResponse, summaryResponse] = await Promise.all([
+                        fetch('/api/investments', {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        }),
+                        fetch('/api/investments/summary', {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        })
+                    ]);
+
+                    if (!investmentsResponse.ok) throw new Error('Erro ao buscar investimentos.');
+                    if (!summaryResponse.ok) throw new Error('Erro ao buscar resumo.');
+
+                    const investments = await investmentsResponse.json();
+                    const summary = await summaryResponse.json();
+
+                    renderInvestments(investments);
+                    renderSummary(summary);
+                    renderCharts(summary);
+                } catch (error) {
+                    investmentsTbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">${error.message}</td></tr>`;
+                    showNotification(error.message, true);
+                } finally {
+                    loadingDiv.style.display = 'none';
+                }
+            };
+
+            const renderInvestments = (investments) => {
+                investmentsTbody.innerHTML = '';
+                if (investments.length === 0) {
+                    investmentsTbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Nenhum investimento encontrado.</td></tr>';
+                    return;
+                }
+
+                investments.forEach(investment => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${investment.description}</td>
+                        <td>${investment.category_name}</td>
+                        <td>${formatDate(investment.date)}</td>
+                        <td class="amount">${formatCurrency(investment.amount)}</td>
+                        <td class="action-buttons">
+                            <button class="edit-btn" data-id='${JSON.stringify(investment)}'><i class="fas fa-edit"></i></button>
+                            <button class="delete-btn" data-id="${investment.id}"><i class="fas fa-trash"></i></button>
+                        </td>
+                    `;
+                    investmentsTbody.appendChild(row);
+                });
+            };
+
+            const renderSummary = (summary) => {
+                document.getElementById('total-invested').textContent = formatCurrency(summary.total_amount);
+                document.getElementById('total-investments').textContent = summary.total_investments;
+
+                const largestInvestment = summary.by_category.reduce((max, item) =>
+                    item.amount > max.amount ? item : max, { amount: 0 }
+                );
+                document.getElementById('largest-investment').textContent = formatCurrency(largestInvestment.amount);
+            };
+
+            const renderCharts = (summary) => {
+                // Gráfico de distribuição por categoria
+                const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+                if (categoryChartInstance) categoryChartInstance.destroy();
+
+                categoryChartInstance = new Chart(categoryCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: summary.by_category.map(item => item.category),
+                        datasets: [{
+                            data: summary.by_category.map(item => item.amount),
+                            backgroundColor: ['#2a4b8d', '#4e7ae6', '#7e6cca', '#ffab00', '#36b37e', '#637381'],
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom' }
+                        }
+                    }
+                });
+
+                // Gráfico de timeline (simplificado)
+                const timelineCtx = document.getElementById('timelineChart').getContext('2d');
+                if (timelineChartInstance) timelineChartInstance.destroy();
+
+                // Aqui você poderia buscar dados temporais mais detalhados
+                timelineChartInstance = new Chart(timelineCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+                        datasets: [{
+                            label: 'Investimentos Mensais',
+                            data: [5000, 7500, 6000, 9000, 8500, 11000],
+                            borderColor: '#4e7ae6',
+                            backgroundColor: 'rgba(78, 122, 230, 0.1)',
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { beginAtZero: true }
+                        }
+                    }
+                });
+            };
+
+            const loadCategories = async () => {
+                try {
+                    const response = await fetch('/api/categories?type=investment', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const categories = await response.json();
+
+                    const categorySelect = document.getElementById('category');
+                    categorySelect.innerHTML = '<option value="">Selecione a categoria</option>';
+                    categories.forEach(cat => {
+                        categorySelect.innerHTML += `<option value="${cat.id}">${cat.name}</option>`;
+                    });
+                } catch (error) {
+                    console.error('Erro ao carregar categorias:', error);
+                }
+            };
+
+            const openModal = (investment = null) => {
+                investmentForm.reset();
+                currentEditingId = null;
+
+                if (investment) {
+                    document.getElementById('modal-title').textContent = 'Editar Investimento';
+                    currentEditingId = investment.id;
+                    document.getElementById('description').value = investment.description;
+                    document.getElementById('amount').value = investment.amount;
+                    document.getElementById('date').value = investment.date.split('T')[0];
+                    document.getElementById('category').value = investment.category_id;
+                } else {
+                    document.getElementById('modal-title').textContent = 'Novo Investimento';
+                    document.getElementById('date').value = new Date().toISOString().split('T')[0];
+                }
+
+                loadCategories();
+                modal.style.display = 'flex';
+            };
+
+            const closeModal = () => {
+                modal.style.display = 'none';
+            };
+
+            addInvestmentBtn.onclick = () => openModal();
+            closeButtons.forEach(btn => btn.onclick = closeModal);
+            window.onclick = (event) => {
+                if (event.target == modal) closeModal();
+            };
+
+            investmentForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const investmentData = {
+                    description: document.getElementById('description').value,
+                    amount: document.getElementById('amount').value,
+                    date: document.getElementById('date').value,
+                    category_id: document.getElementById('category').value
+                };
+
+                const method = currentEditingId ? 'PUT' : 'POST';
+                const url = currentEditingId ? `/api/investments/${currentEditingId}` : '/api/investments';
+
+                try {
+                    const response = await fetch(url, {
+                        method,
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify(investmentData)
+                    });
+
+                    if (!response.ok) {
+                        const errData = await response.json();
+                        throw new Error(errData.error || 'Falha ao salvar investimento.');
+                    }
+
+                    closeModal();
+                    fetchInvestments();
+                    showNotification('Investimento salvo com sucesso!');
+                } catch (error) {
+                    showNotification(error.message, true);
+                }
+            });
+
+            investmentsTbody.addEventListener('click', async (e) => {
+                const editBtn = e.target.closest('.edit-btn');
+                const deleteBtn = e.target.closest('.delete-btn');
+
+                if (editBtn) {
+                    const investmentData = JSON.parse(editBtn.dataset.id);
+                    openModal(investmentData);
+                }
+
+                if (deleteBtn) {
+                    const id = deleteBtn.dataset.id;
+                    if (confirm('Tem certeza que deseja excluir este investimento?')) {
+                        try {
+                            const response = await fetch(`/api/investments/${id}`, {
+                                method: 'DELETE',
+                                headers: { 'Authorization': `Bearer ${token}` }
+                            });
+
+                            if (!response.ok) throw new Error('Falha ao excluir investimento.');
+
+                            fetchInvestments();
+                            showNotification('Investimento excluído com sucesso!');
+                        } catch (error) {
+                            showNotification(error.message, true);
+                        }
+                    }
+                }
+            });
+
+            document.getElementById('logout-button').addEventListener('click', () => {
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('userName');
+                window.location.href = './login.html';
+            });
+
+            // Carga inicial
+            fetchInvestments();
+        });
+        // Gerenciamento do tema escuro
+        document.addEventListener('DOMContentLoaded', function () {
+            const themeToggleBtn = document.getElementById('theme-toggle');
+            const themeIcon = themeToggleBtn.querySelector('i');
+
+            // Verificar preferência salva ou preferência do sistema
+            const savedTheme = localStorage.getItem('theme');
+            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const currentTheme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
+
+            // Aplicar tema
+            if (currentTheme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+                themeToggleBtn.innerHTML = '<i class="fas fa-sun"></i> Modo Claro';
+            }
+
+            // Alternar tema
+            themeToggleBtn.addEventListener('click', function () {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+
+                if (currentTheme === 'dark') {
+                    document.documentElement.removeAttribute('data-theme');
+                    localStorage.setItem('theme', 'light');
+                    themeIcon.classList.remove('fa-sun');
+                    themeIcon.classList.add('fa-moon');
+                    themeToggleBtn.innerHTML = '<i class="fas fa-moon"></i> Modo Escuro';
+                } else {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                    themeIcon.classList.remove('fa-moon');
+                    themeIcon.classList.add('fa-sun');
+                    themeToggleBtn.innerHTML = '<i class="fas fa-sun"></i> Modo Claro';
+                }
+            });
+        });
+        // Função para atualizar os gráficos quando o tema mudar
+        function updateChartsOnThemeChange() {
+            // Esta função deve ser chamada sempre que o tema for alterado
+            if (typeof incomeExpenseChartInstance !== 'undefined') {
+                incomeExpenseChartInstance.destroy();
+                incomeExpenseChartInstance = null;
+            }
+
+            if (typeof expensesChartInstance !== 'undefined') {
+                expensesChartInstance.destroy();
+                expensesChartInstance = null;
+            }
+
+            // Recarregue os dados do dashboard para recriar os gráficos
+            if (typeof loadDashboardData === 'function') {
+                loadDashboardData();
+            }
+        }
+
+        // Modifique o event listener do botão de tema para incluir a atualização dos gráficos
+        themeToggleBtn.addEventListener('click', function () {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+
+            if (currentTheme === 'dark') {
+                document.documentElement.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
+                themeToggleBtn.innerHTML = '<i class="fas fa-moon"></i> Modo Escuro';
+            } else {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+                themeToggleBtn.innerHTML = '<i class="fas fa-sun"></i> Modo Claro';
+            }
+
+            // Atualizar os gráficos após a mudança de tema
+            setTimeout(updateChartsOnThemeChange, 100);
+        });
+    </script>
+</body>
+
+</html>

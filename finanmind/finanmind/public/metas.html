@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinanMind | Metas Financeiras</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Poppins:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="shortcut icon" href="aumentar.png" type="image/x-icon">
+    <style>
+        /* Estilos anteriores mantidos */
+        :root {
+            --primary: #2a4b8d;
+            --secondary: #4e7ae6;
+            --accent: #7e6cca;
+            --success: #36b37e;
+            --warning: #ffab00;
+            --danger: #ff5630;
+            --light: #f9fafc;
+            --dark: #212b36;
+            --gray: #637381;
+            --bg-light: #f5f7fa;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            display: flex;
+            color: var(--dark);
+        }
+
+        .sidebar {
+            width: 260px;
+            background-color: var(--light);
+            padding: 20px;
+            height: 100vh;
+            position: fixed;
+            border-right: 1px solid #e0e0e0;
+        }
+
+        .sidebar .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .sidebar .menu a {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            color: var(--gray);
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .sidebar .menu a.active {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        .sidebar .menu a:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .sidebar .menu a i {
+            margin-right: 15px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .main-content {
+            margin-left: 260px;
+            padding: 30px;
+            width: calc(100% - 260px);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-actions .user-profile {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .header-actions .user-profile img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .card {
+            background-color: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        .btn-secondary {
+            background-color: #e0e0e0;
+            color: var(--dark);
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-info {
+            background-color: var(--accent);
+            color: white;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 30px;
+            border: 1px solid #888;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+        }
+
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .modal-footer {
+            text-align: right;
+            margin-top: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            font-weight: 500;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        /* Goal specific styles */
+        .goals-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .goal-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .goal-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+        }
+
+        .goal-progress {
+            margin-bottom: 10px;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 8px;
+            height: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--success);
+            border-radius: 8px;
+            transition: width 0.5s ease-in-out;
+        }
+
+        .goal-details {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: var(--gray);
+            margin-top: 5px;
+        }
+
+        .goal-details .amount {
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .goal-deadline {
+            font-size: 0.9rem;
+            color: var(--gray);
+            margin-top: 15px;
+        }
+
+        .goal-actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .goal-actions button {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        /* Report modal styles */
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .report-table th,
+        .report-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .report-table th {
+            background-color: #f5f7fa;
+            font-weight: 600;
+        }
+
+        .report-summary {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9fafc;
+            border-radius: 8px;
+        }
+
+        .report-summary h4 {
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            z-index: 2000;
+            display: none;
+        }
+
+        .notification.success {
+            background-color: var(--success);
+        }
+
+        .notification.error {
+            background-color: var(--danger);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--secondary);
+            color: var(--secondary);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        /* Variáveis para modo escuro */
+        [data-theme="dark"] {
+            --bg-light: #1a1a1a;
+            --light: #2d2d2d;
+            --dark: #f5f5f5;
+            --gray: #a0a0a0;
+        }
+
+        [data-theme="dark"] body {
+            background-color: var(--bg-light);
+            color: var(--dark);
+        }
+
+        [data-theme="dark"] .card {
+            background-color: #2d2d2d;
+            color: var(--dark);
+        }
+
+        [data-theme="dark"] .sidebar {
+            background-color: #252525;
+            border-right: 1px solid #444;
+        }
+
+        [data-theme="dark"] .sidebar .menu a {
+            color: var(--gray);
+        }
+
+        [data-theme="dark"] .sidebar .menu a.active,
+        [data-theme="dark"] .sidebar .menu a:hover {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        [data-theme="dark"] input,
+        [data-theme="dark"] select {
+            background-color: #3d3d3d;
+            color: var(--dark);
+            border-color: #555;
+        }
+
+        /* Correções para modo escuro nos modais e gráficos */
+        [data-theme="dark"] .modal-content {
+            background-color: #2d2d2d;
+            color: var(--dark);
+        }
+
+        [data-theme="dark"] .modal-header {
+            border-bottom: 1px solid #444;
+        }
+
+        [data-theme="dark"] .close-button {
+            color: #aaa;
+        }
+
+        [data-theme="dark"] .close-button:hover {
+            color: #fff;
+        }
+
+        /* Ajustes para gráficos no modo escuro */
+        [data-theme="dark"] .chartjs-render-monitor {
+            filter: invert(90%) hue-rotate(180deg);
+        }
+
+        /* Ajustes específicos para textos dentro dos gráficos */
+        [data-theme="dark"] .chartjs-grid,
+        [data-theme="dark"] .chartjs-scale,
+        [data-theme="dark"] .chartjs-legend {
+            color: rgba(255, 255, 255, 0.8) !important;
+            fill: rgba(255, 255, 255, 0.8) !important;
+        }
+
+        /* Ajustes para as tabelas no modo escuro */
+        [data-theme="dark"] table {
+            color: var(--dark);
+        }
+
+        [data-theme="dark"] .transactions-table th {
+            background-color: #3d3d3d;
+            color: var(--dark);
+        }
+
+        [data-theme="dark"] .transactions-table td {
+            border-bottom: 1px solid #444;
+        }
+    </style>
+</head>
+
+<body>
+    <aside class="sidebar">
+        <div class="logo">FinanMind</div>
+        <nav class="menu">
+            <a href="dashboard.html"><i class="fas fa-chart-pie"></i> Dashboard</a>
+            <a href="transacoes.html"><i class="fas fa-exchange-alt"></i> Transações</a>
+            <a href="investimentos.html"><i class="fas fa-chart-line"></i> Investimentos</a>
+            <a href="metas.html" class="active"><i class="fas fa-tasks"></i> Metas</a>
+            <a href="relatorios.html"><i class="fas fa-file-alt"></i> Relatórios</a>
+            <a href="configuracoes.html"><i class="fas fa-cog"></i> Configurações</a>
+            <a href="#" id="logout-button"><i class="fas fa-sign-out-alt"></i> Sair</a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <header>
+            <h1>Minhas Metas</h1>
+            <div class="header-actions">
+                <button id="theme-toggle" class="btn btn-outline" style="margin-left: 15px;">
+                    <i class="fas fa-moon"></i> Modo Escuro
+                </button>
+                <button id="add-goal-btn" class="btn btn-primary"><i class="fas fa-plus"></i> Nova Meta</button>
+                <div class="user-profile">
+                    <img src="https://i.pravatar.cc/150?u=a042581f4e29026704d" alt="User">
+                    <span id="user-name">Usuário</span>
+                </div>
+            </div>
+        </header>
+
+        <section id="goals-container" class="goals-grid">
+            <!-- Metas serão inseridas aqui dinamicamente -->
+        </section>
+        <div id="loading" style="text-align: center; padding: 20px; display: none;">Carregando...</div>
+    </main>
+
+    <!-- Modal para Adicionar/Editar Meta -->
+    <div id="goal-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Nova Meta</h2>
+                <span class="close-button">&times;</span>
+            </div>
+            <form id="goal-form">
+                <input type="hidden" id="goal-id">
+                <div class="form-group">
+                    <label for="title">Título da Meta</label>
+                    <input type="text" id="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="target_amount">Valor Alvo</label>
+                    <input type="number" id="target_amount" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="current_amount">Valor Atual</label>
+                    <input type="number" id="current_amount" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="deadline">Prazo</label>
+                    <input type="date" id="deadline">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary close-button">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para Adicionar Valor à Meta -->
+    <div id="add-value-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Adicionar Valor à Meta</h2>
+                <span class="close-button">&times;</span>
+            </div>
+            <form id="add-value-form">
+                <input type="hidden" id="value-goal-id">
+                <div class="form-group">
+                    <label for="value-amount">Valor a Adicionar</label>
+                    <input type="number" id="value-amount" step="0.01" required min="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="value-description">Descrição (opcional)</label>
+                    <textarea id="value-description" rows="3"
+                        placeholder="Ex: Depósito inicial, Economia mensal, etc."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="value-date">Data</label>
+                    <input type="date" id="value-date" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary close-button">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Adicionar Valor</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para Relatório de Meta -->
+    <div id="report-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Relatório da Meta</h2>
+                <span class="close-button">&times;</span>
+            </div>
+            <div id="report-content">
+                <div id="report-loading" style="text-align: center; padding: 20px;">Carregando relatório...</div>
+                <div id="report-data" style="display: none;">
+                    <h3 id="report-goal-title"></h3>
+                    <table class="report-table">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Descrição</th>
+                                <th>Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody id="report-transactions">
+                            <!-- Transações serão inseridas aqui -->
+                        </tbody>
+                    </table>
+                    <div class="report-summary">
+                        <h4>Resumo</h4>
+                        <p>Total de transações: <span id="total-transactions">0</span></p>
+                        <p>Valor total adicionado: <span id="total-amount">R$ 0,00</span></p>
+                        <p>Média por transação: <span id="average-amount">R$ 0,00</span></p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary close-button">Fechar</button>
+                <button id="export-report-btn" class="btn btn-info"><i class="fas fa-download"></i> Exportar
+                    PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                window.location.href = './login.html';
+                return;
+            }
+
+            const userName = localStorage.getItem('userName');
+            if (userName) {
+                document.getElementById('user-name').textContent = userName;
+            }
+
+            const modal = document.getElementById('goal-modal');
+            const addValueModal = document.getElementById('add-value-modal');
+            const reportModal = document.getElementById('report-modal');
+            const addGoalBtn = document.getElementById('add-goal-btn');
+            const closeButtons = document.querySelectorAll('.close-button');
+            const goalForm = document.getElementById('goal-form');
+            const addValueForm = document.getElementById('add-value-form');
+            const goalsContainer = document.getElementById('goals-container');
+            const loadingDiv = document.getElementById('loading');
+            const notification = document.getElementById('notification');
+
+            let currentEditingId = null;
+            let currentGoalForReport = null;
+
+            const formatCurrency = (value) => parseFloat(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            function formatDate(dateString) {
+                // Se a data já incluir informações de tempo, use diretamente
+                if (dateString.includes('T')) {
+                    const date = new Date(dateString);
+                    return date.toLocaleDateString('pt-BR');
+                }
+                // Se for apenas a data (YYYY-MM-DD), adicione o timezone corretamente
+                const date = new Date(dateString);
+                // Ajusta para o fuso horário local
+                const adjustedDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+                return adjustedDate.toLocaleDateString('pt-BR');
+            }
+
+            const showNotification = (message, isError = false) => {
+                notification.textContent = message;
+                notification.className = 'notification ' + (isError ? 'error' : 'success');
+                notification.style.display = 'block';
+
+                setTimeout(() => {
+                    notification.style.display = 'none';
+                }, 3000);
+            };
+
+            const fetchGoals = async () => {
+                loadingDiv.style.display = 'block';
+                goalsContainer.innerHTML = '';
+
+                try {
+                    const response = await fetch('/api/goals', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!response.ok) throw new Error('Erro ao buscar metas.');
+
+                    const goals = await response.json();
+                    renderGoals(goals);
+                } catch (error) {
+                    goalsContainer.innerHTML = `<p style="text-align:center;">${error.message}</p>`;
+                } finally {
+                    loadingDiv.style.display = 'none';
+                }
+            };
+
+            const renderGoals = (goals) => {
+                goalsContainer.innerHTML = '';
+                if (goals.length === 0) {
+                    goalsContainer.innerHTML = '<p style="text-align:center; grid-column: 1 / -1;">Você ainda não tem nenhuma meta. Que tal criar uma?</p>';
+                    return;
+                }
+                goals.forEach(goal => {
+                    const progress = (goal.current_amount / goal.target_amount) * 100;
+                    const progressPercent = Math.min(progress, 100);
+                    const isCompleted = goal.current_amount >= goal.target_amount;
+
+                    const goalCard = document.createElement('div');
+                    goalCard.className = 'card goal-card';
+                    goalCard.innerHTML = `
+                        <div>
+                            <h3>${goal.title} ${isCompleted ? '✅' : ''}</h3>
+                            <div class="goal-progress">
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" style="width: ${progressPercent}%;"></div>
+                                </div>
+                                <div class="goal-details">
+                                    <span class="amount">${formatCurrency(goal.current_amount)} / ${formatCurrency(goal.target_amount)}</span>
+                                    <span>${progressPercent.toFixed(1)}%</span>
+                                </div>
+                            </div>
+                            <div class="goal-deadline">
+                                <i class="fas fa-calendar-alt"></i> Prazo: ${formatDate(goal.deadline)}
+                            </div>
+                        </div>
+                        <div class="goal-actions">
+                            <button class="btn-success add-value-btn" data-id="${goal.id}" data-title="${goal.title}">
+                                <i class="fas fa-plus"></i> Valor
+                            </button>
+                            <button class="btn-info report-btn" data-id="${goal.id}" data-title="${goal.title}">
+                                <i class="fas fa-chart-bar"></i> Relatório
+                            </button>
+                            <button class="btn-primary edit-btn" data-id='${JSON.stringify(goal)}'>
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-secondary delete-btn" data-id="${goal.id}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                    goalsContainer.appendChild(goalCard);
+                });
+            };
+
+            const openModal = (goal = null) => {
+                goalForm.reset();
+                currentEditingId = null;
+                if (goal) {
+                    document.getElementById('modal-title').textContent = 'Editar Meta';
+                    currentEditingId = goal.id;
+                    document.getElementById('title').value = goal.title;
+                    document.getElementById('target_amount').value = goal.target_amount;
+                    document.getElementById('current_amount').value = goal.current_amount;
+                    document.getElementById('deadline').value = goal.deadline ? goal.deadline.split('T')[0] : '';
+                } else {
+                    document.getElementById('modal-title').textContent = 'Nova Meta';
+                }
+                modal.style.display = 'flex';
+            };
+
+            const openAddValueModal = (goalId, goalTitle) => {
+                document.getElementById('value-goal-id').value = goalId;
+                document.getElementById('add-value-form').reset();
+                document.getElementById('value-date').value = new Date().toISOString().split('T')[0];
+                addValueModal.style.display = 'flex';
+            };
+
+            const openReportModal = async (goalId, goalTitle) => {
+                currentGoalForReport = { id: goalId, title: goalTitle };
+                document.getElementById('report-loading').style.display = 'block';
+                document.getElementById('report-data').style.display = 'none';
+                reportModal.style.display = 'flex';
+
+                try {
+                    const response = await fetch(`/api/goal-transactions/report/${goalId}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+
+                    if (!response.ok) throw new Error('Erro ao carregar relatório');
+
+                    const reportData = await response.json();
+                    renderReport(reportData, goalTitle);
+                } catch (error) {
+                    document.getElementById('report-content').innerHTML = `<p style="text-align:center;color:var(--danger);">${error.message}</p>`;
+                }
+            };
+
+            const renderReport = (reportData, goalTitle) => {
+                document.getElementById('report-goal-title').textContent = goalTitle;
+                const transactionsBody = document.getElementById('report-transactions');
+                transactionsBody.innerHTML = '';
+
+                if (reportData.transactions.length === 0) {
+                    transactionsBody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Nenhuma transação encontrada</td></tr>';
+                } else {
+                    reportData.transactions.forEach(transaction => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${formatDate(transaction.date)}</td>
+                            <td>${transaction.description || 'Sem descrição'}</td>
+                            <td>${formatCurrency(transaction.amount)}</td>
+                        `;
+                        transactionsBody.appendChild(row);
+                    });
+                }
+
+                document.getElementById('total-transactions').textContent = reportData.summary.total_transactions;
+                document.getElementById('total-amount').textContent = formatCurrency(reportData.summary.total_amount);
+                document.getElementById('average-amount').textContent = formatCurrency(reportData.summary.average_per_transaction);
+
+                document.getElementById('report-loading').style.display = 'none';
+                document.getElementById('report-data').style.display = 'block';
+            };
+
+            const closeModal = () => {
+                modal.style.display = 'none';
+                addValueModal.style.display = 'none';
+                reportModal.style.display = 'none';
+            };
+
+            addGoalBtn.onclick = () => openModal();
+            closeButtons.forEach(btn => btn.onclick = closeModal);
+            window.onclick = (event) => {
+                if (event.target == modal || event.target == addValueModal || event.target == reportModal) closeModal();
+            };
+
+            goalForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const goalData = {
+                    title: document.getElementById('title').value,
+                    target_amount: document.getElementById('target_amount').value,
+                    current_amount: document.getElementById('current_amount').value,
+                    deadline: document.getElementById('deadline').value || null,
+                };
+
+                const method = currentEditingId ? 'PUT' : 'POST';
+                const url = currentEditingId ? `/api/goals/${currentEditingId}` : '/api/goals';
+
+                try {
+                    const response = await fetch(url, {
+                        method,
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify(goalData)
+                    });
+                    if (!response.ok) {
+                        const errData = await response.json();
+                        throw new Error(errData.error || 'Falha ao salvar meta.');
+                    }
+                    closeModal();
+                    fetchGoals();
+                    showNotification('Meta salva com sucesso!');
+                } catch (error) {
+                    showNotification(error.message, true);
+                }
+            });
+
+            addValueForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const goalId = document.getElementById('value-goal-id').value;
+                const valueData = {
+                    goal_id: goalId,
+                    amount: document.getElementById('value-amount').value,
+                    description: document.getElementById('value-description').value,
+                    date: document.getElementById('value-date').value
+                };
+
+                try {
+                    const response = await fetch('/api/goal-transactions', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify(valueData)
+                    });
+
+                    if (!response.ok) {
+                        const errData = await response.json();
+                        throw new Error(errData.error || 'Falha ao adicionar valor.');
+                    }
+
+                    const result = await response.json();
+                    closeModal();
+                    fetchGoals();
+                    showNotification('Valor adicionado com sucesso!');
+                } catch (error) {
+                    showNotification(error.message, true);
+                }
+            });
+
+            document.getElementById('export-report-btn').addEventListener('click', () => {
+                if (!currentGoalForReport) return;
+
+                // Simples implementação de exportação (poderia ser mais elaborada)
+                const reportData = document.getElementById('report-data').innerText;
+                const blob = new Blob([reportData], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `relatorio_meta_${currentGoalForReport.title.replace(/\s/g, '_')}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            });
+
+            goalsContainer.addEventListener('click', async (e) => {
+                const addValueBtn = e.target.closest('.add-value-btn');
+                const reportBtn = e.target.closest('.report-btn');
+                const editBtn = e.target.closest('.edit-btn');
+                const deleteBtn = e.target.closest('.delete-btn');
+
+                if (addValueBtn) {
+                    const goalId = addValueBtn.dataset.id;
+                    const goalTitle = addValueBtn.dataset.title;
+                    openAddValueModal(goalId, goalTitle);
+                }
+
+                if (reportBtn) {
+                    const goalId = reportBtn.dataset.id;
+                    const goalTitle = reportBtn.dataset.title;
+                    openReportModal(goalId, goalTitle);
+                }
+
+                if (editBtn) {
+                    const goalData = JSON.parse(editBtn.dataset.id);
+                    openModal(goalData);
+                }
+
+                if (deleteBtn) {
+                    const id = deleteBtn.dataset.id;
+                    if (confirm('Tem certeza que deseja excluir esta meta?')) {
+                        try {
+                            const response = await fetch(`/api/goals/${id}`, {
+                                method: 'DELETE',
+                                headers: { 'Authorization': `Bearer ${token}` }
+                            });
+                            if (!response.ok) throw new Error('Falha ao excluir meta.');
+                            fetchGoals();
+                            showNotification('Meta excluída com sucesso!');
+                        } catch (error) {
+                            showNotification(error.message, true);
+                        }
+                    }
+                }
+            });
+
+            document.getElementById('logout-button').addEventListener('click', () => {
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('userName');
+                window.location.href = './login.html';
+            });
+
+            // Set today's date as default for value addition
+            document.getElementById('value-date').value = new Date().toISOString().split('T')[0];
+
+            // Carga inicial
+            fetchGoals();
+        });
+        // Gerenciamento do tema escuro
+        document.addEventListener('DOMContentLoaded', function () {
+            const themeToggleBtn = document.getElementById('theme-toggle');
+            const themeIcon = themeToggleBtn.querySelector('i');
+
+            // Verificar preferência salva ou preferência do sistema
+            const savedTheme = localStorage.getItem('theme');
+            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const currentTheme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
+
+            // Aplicar tema
+            if (currentTheme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+                themeToggleBtn.innerHTML = '<i class="fas fa-sun"></i> Modo Claro';
+            }
+
+            // Alternar tema
+            themeToggleBtn.addEventListener('click', function () {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+
+                if (currentTheme === 'dark') {
+                    document.documentElement.removeAttribute('data-theme');
+                    localStorage.setItem('theme', 'light');
+                    themeIcon.classList.remove('fa-sun');
+                    themeIcon.classList.add('fa-moon');
+                    themeToggleBtn.innerHTML = '<i class="fas fa-moon"></i> Modo Escuro';
+                } else {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                    themeIcon.classList.remove('fa-moon');
+                    themeIcon.classList.add('fa-sun');
+                    themeToggleBtn.innerHTML = '<i class="fas fa-sun"></i> Modo Claro';
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

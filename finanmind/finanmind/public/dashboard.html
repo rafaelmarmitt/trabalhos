@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinanMind | Dashboard Financeiro</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Poppins:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="shortcut icon" href="aumentar.png" type="image/x-icon">
+
+    <style>
+        :root {
+            --primary: #2a4b8d;
+            --secondary: #4e7ae6;
+            --accent: #7e6cca;
+            --success: #36b37e;
+            --warning: #ffab00;
+            --danger: #ff5630;
+            --light: #f9fafc;
+            --dark: #212b36;
+            --gray: #637381;
+            --bg-light: #f5f7fa;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            display: flex;
+            color: var(--dark);
+        }
+
+        .sidebar {
+            width: 260px;
+            background-color: var(--light);
+            padding: 20px;
+            height: 100vh;
+            position: fixed;
+            border-right: 1px solid #e0e0e0;
+        }
+
+        .sidebar .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .sidebar .menu a {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            color: var(--gray);
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .sidebar .menu a.active,
+        .sidebar .menu a:hover {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        .sidebar .menu a i {
+            margin-right: 15px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .main-content {
+            margin-left: 260px;
+            padding: 30px;
+            width: calc(100% - 260px);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-actions .user-profile {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .header-actions .user-profile img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .header-actions .user-profile span {
+            font-weight: 500;
+        }
+
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background-color: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .card .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .card .card-header h3 {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--gray);
+        }
+
+        .card .card-header i {
+            font-size: 24px;
+            padding: 10px;
+            border-radius: 50%;
+            color: white;
+        }
+
+        .card .card-value {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .card .card-details {
+            font-size: 14px;
+            color: var(--gray);
+            margin-top: 5px;
+        }
+
+        .card.income i {
+            background-color: var(--success);
+        }
+
+        .card.expense i {
+            background-color: var(--danger);
+        }
+
+        .card.investment i {
+            background-color: var(--accent);
+        }
+
+        .card.balance i {
+            background-color: var(--secondary);
+        }
+
+        .charts {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chart-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .transactions-list {
+            background-color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .transactions-list h2 {
+            margin-bottom: 20px;
+        }
+
+        .transactions-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .transactions-table th,
+        .transactions-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .transactions-table th {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--gray);
+        }
+
+        .transaction-type {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .transaction-type .icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .transaction-type.income .icon {
+            background-color: var(--success);
+        }
+
+        .transaction-type.expense .icon {
+            background-color: var(--danger);
+        }
+
+        .transaction-type.investment .icon {
+            background-color: var(--accent);
+        }
+
+        .amount {
+            font-weight: 600;
+        }
+
+        .amount.income {
+            color: var(--success);
+        }
+
+        .amount.expense {
+            color: var(--danger);
+        }
+
+        .amount.investment {
+            color: var(--accent);
+        }
+
+        /* Estilos do Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 30px;
+            border: 1px solid #888;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+        }
+
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .form-group .radio-group {
+            display: flex;
+            gap: 15px;
+        }
+
+        .modal-footer {
+            text-align: right;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        .btn-secondary {
+            background-color: #e0e0e0;
+            color: var(--dark);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--secondary);
+            color: var(--secondary);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        /* Variáveis para modo escuro */
+        [data-theme="dark"] {
+            --bg-light: #1a1a1a;
+            --light: #2d2d2d;
+            --dark: #f5f5f5;
+            --gray: #a0a0a0;
+        }
+
+        [data-theme="dark"] body {
+            background-color: var(--bg-light);
+            color: var(--dark);
+        }
+
+        [data-theme="dark"] .card {
+            background-color: #2d2d2d;
+            color: var(--dark);
+        }
+
+        [data-theme="dark"] .sidebar {
+            background-color: #252525;
+            border-right: 1px solid #444;
+        }
+
+        [data-theme="dark"] .sidebar .menu a {
+            color: var(--gray);
+        }
+
+        [data-theme="dark"] .sidebar .menu a.active,
+        [data-theme="dark"] .sidebar .menu a:hover {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        [data-theme="dark"] input,
+        [data-theme="dark"] select {
+            background-color: #3d3d3d;
+            color: var(--dark);
+            border-color: #555;
+        }
+
+        /* Correções para modo escuro nos modais e gráficos */
+        [data-theme="dark"] .modal-content {
+            background-color: #2d2d2d;
+            color: var(--dark);
+        }
+
+        [data-theme="dark"] .modal-header {
+            border-bottom: 1px solid #444;
+        }
+
+        [data-theme="dark"] .close-button {
+            color: #aaa;
+        }
+
+        [data-theme="dark"] .close-button:hover {
+            color: #fff;
+        }
+
+        /* Ajustes para gráficos no modo escuro */
+        [data-theme="dark"] .chart-container {
+            background-color: #3d3d3d;
+        }
+
+        /* Ajustes específicos para textos dentro dos gráficos */
+        [data-theme="dark"] .chart-container,
+        [data-theme="dark"] .chart-container,
+        [data-theme="dark"] .chart-container {
+            color: rgba(255, 255, 255, 0.8) !important;
+            fill: rgba(255, 255, 255, 0.8) !important;
+        }
+
+        /* Ajustes para as tabelas no modo escuro */
+        [data-theme="dark"] .transactions-list {
+            background-color: #2d2d2d;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .transactions-list h2 {
+            margin-bottom: 20px;
+        }
+
+        [data-theme="dark"] .transactions-table th {
+            background-color: #3d3d3d;
+            color: var(--dark);
+        }
+
+        [data-theme="dark"] .transactions-table td {
+            border-bottom: 1px solid #444;
+        }
+    </style>
+</head>
+
+<body>
+    <aside class="sidebar">
+        <div class="logo">FinanMind</div>
+        <nav class="menu">
+            <a href="dashboard.html" class="active"><i class="fas fa-chart-pie"></i> Dashboard</a>
+            <a href="transacoes.html"><i class="fas fa-exchange-alt"></i> Transações</a>
+            <a href="investimentos.html"><i class="fas fa-chart-line"></i> Investimentos</a>
+            <a href="metas.html"><i class="fas fa-tasks"></i> Metas</a>
+            <a href="relatorios.html"><i class="fas fa-file-alt"></i> Relatórios</a>
+            <a href="configuracoes.html"><i class="fas fa-cog"></i> Configurações</a>
+            <a href="#" id="logout-button"><i class="fas fa-sign-out-alt"></i> Sair</a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <header>
+            <h1>Dashboard</h1>
+            <div class="header-actions">
+                <button id="theme-toggle" class="btn btn-outline" style="margin-left: 15px;">
+                    <i class="fas fa-moon"></i> Modo Escuro
+                </button>
+                <button id="add-transaction-btn" class="btn btn-primary"><i class="fas fa-plus"></i> Adicionar
+                    Transação</button>
+                <div class="user-profile">
+                    <img src="https://i.pravatar.cc/150?u=a042581f4e29026704d" alt="User">
+                    <span id="user-name">Usuário</span>
+                </div>
+            </div>
+        </header>
+
+        <section class="summary-cards">
+            <div class="card income">
+                <div class="card-header">
+                    <h3>Receitas</h3>
+                    <i class="fas fa-arrow-up"></i>
+                </div>
+                <div class="card-value" id="summary-income">R$ 0,00</div>
+            </div>
+            <div class="card expense">
+                <div class="card-header">
+                    <h3>Despesas</h3>
+                    <i class="fas fa-arrow-down"></i>
+                </div>
+                <div class="card-value" id="summary-expense">R$ 0,00</div>
+            </div>
+            <div class="card investment">
+                <div class="card-header">
+                    <h3>Investimentos</h3>
+                    <i class="fas fa-piggy-bank"></i>
+                </div>
+                <div class="card-value" id="summary-investment">R$ 0,00</div>
+            </div>
+            <div class="card balance">
+                <div class="card-header">
+                    <h3>Saldo</h3>
+                    <i class="fas fa-balance-scale"></i>
+                </div>
+                <div class="card-value" id="summary-balance">R$ 0,00</div>
+            </div>
+        </section>
+
+        <section class="charts">
+            <div class="chart-container">
+                <canvas id="expensesChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <canvas id="incomeExpenseChart"></canvas>
+            </div>
+        </section>
+
+        <section class="transactions-list">
+            <h2>Últimas Transações</h2>
+            <table class="transactions-table">
+                <thead>
+                    <tr>
+                        <th>Descrição</th>
+                        <th>Categoria</th>
+                        <th>Data</th>
+                        <th>Valor</th>
+                    </tr>
+                </thead>
+                <tbody id="transactions-tbody">
+                    <!-- Linhas da tabela serão inseridas dinamicamente aqui -->
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <!-- Modal para Adicionar Transação -->
+    <div id="add-transaction-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Adicionar Nova Transação</h2>
+                <span class="close-button">&times;</span>
+            </div>
+            <form id="add-transaction-form">
+                <div class="form-group">
+                    <label for="description">Descrição</label>
+                    <input type="text" id="description" name="description" required>
+                </div>
+                <div class="form-group">
+                    <label for="amount">Valor</label>
+                    <input type="number" id="amount" name="amount" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="date">Data</label>
+                    <input type="date" id="date" name="date" required>
+                </div>
+                <div class="form-group">
+                    <label for="type">Tipo</label>
+                    <select id="type" name="type" required>
+                        <option value="expense">Despesa</option>
+                        <option value="income">Receita</option>
+                        <option value="investment">Investimento</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="category">Categoria</label>
+                    <select id="category" name="category_id" required>
+                        <!-- Opções de categoria serão carregadas aqui -->
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary close-button">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script>
+
+        // Variáveis globais para os gráficos
+        let expensesChartInstance;
+        let incomeExpenseChartInstance;
+
+        // Função para formatar valores monetários
+        function formatCurrency(value) {
+            return parseFloat(value).toLocaleString('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            });
+        }
+
+        // Função para formatar datas
+        function formatDate(dateString) {
+            // Se a data já incluir informações de tempo, use diretamente
+            if (dateString.includes('T')) {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('pt-BR');
+            }
+            // Se for apenas a data (YYYY-MM-DD), adicione o timezone corretamente
+            const date = new Date(dateString);
+            // Ajusta para o fuso horário local
+            const adjustedDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+            return adjustedDate.toLocaleDateString('pt-BR');
+        }
+
+        // Função principal para buscar e renderizar os dados do dashboard
+        async function loadDashboardData() {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                window.location.href = 'login.html'; // Redireciona se não estiver logado
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/dashboard/data', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.status === 401 || response.status === 403) {
+                    // Token inválido ou expirado
+                    logout();
+                    return;
+                }
+
+                if (!response.ok) {
+                    throw new Error('Erro ao buscar dados do dashboard');
+                }
+
+                const data = await response.json();
+
+                updateSummaryCards(data.summary);
+                updateTransactionsTable(data.transactions);
+                updateCharts(data.charts);
+
+            } catch (error) {
+                console.error('Erro:', error);
+                // Adicionar feedback para o usuário aqui, se desejar
+            }
+        }
+
+        // Função para atualizar os cartões de resumo
+        function updateSummaryCards(summary) {
+            document.getElementById('summary-income').textContent = formatCurrency(summary.income);
+            document.getElementById('summary-expense').textContent = formatCurrency(summary.expense);
+            document.getElementById('summary-investment').textContent = formatCurrency(summary.investment);
+            document.getElementById('summary-balance').textContent = formatCurrency(summary.balance);
+        }
+
+        // Função para atualizar a tabela de transações
+        function updateTransactionsTable(transactions) {
+            const tbody = document.getElementById('transactions-tbody');
+            tbody.innerHTML = ''; // Limpa a tabela antes de preencher
+
+            if (transactions.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Nenhuma transação encontrada.</td></tr>';
+                return;
+            }
+
+            transactions.forEach(tx => {
+                const row = `
+                    <tr>
+                        <td>
+                            <div class="transaction-type ${tx.category_type}">
+                                <div class="icon"><i class="fas fa-money-bill-wave"></i></div>
+                                <span>${tx.description}</span>
+                            </div>
+                        </td>
+                        <td>${tx.category_name}</td>
+                        <td>${formatDate(tx.date)}</td>
+                        <td>
+                            <div class="amount ${tx.category_type}">
+                                ${tx.category_type === 'expense' ? '-' : ''}${formatCurrency(tx.amount)}
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        // Função para criar ou atualizar os gráficos
+        function updateCharts(chartsData) {
+            // Gráfico de Gastos por Categoria
+            const expensesCtx = document.getElementById('expensesChart').getContext('2d');
+            if (expensesChartInstance) {
+                expensesChartInstance.destroy(); // Destrói o gráfico antigo para criar um novo
+            }
+            expensesChartInstance = new Chart(expensesCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: chartsData.categories.labels,
+                    datasets: [{
+                        label: 'Gastos por Categoria',
+                        data: chartsData.categories.data,
+                        backgroundColor: [
+                            '#2a4b8d', '#4e7ae6', '#7e6cca', '#ffab00',
+                            '#ff5630', '#36b37e', '#637381', '#212b36'
+                        ],
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: 'Gastos por Categoria' }
+                    }
+                }
+            });
+
+            // Gráfico de Receitas vs Despesas
+            const incomeExpenseCtx = document.getElementById('incomeExpenseChart').getContext('2d');
+            if (incomeExpenseChartInstance) {
+                incomeExpenseChartInstance.destroy();
+            }
+            incomeExpenseChartInstance = new Chart(incomeExpenseCtx, {
+                type: 'bar',
+                data: {
+                    labels: chartsData.incomeExpense.labels,
+                    datasets: [
+                        {
+                            label: 'Receitas',
+                            data: chartsData.incomeExpense.income,
+                            backgroundColor: 'rgba(54, 179, 126, 0.7)',
+                        },
+                        {
+                            label: 'Despesas',
+                            data: chartsData.incomeExpense.expense,
+                            backgroundColor: 'rgba(255, 86, 48, 0.7)',
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: 'Receitas vs Despesas (Últimos Meses)' }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        // Lógica do Modal de Adicionar Transação
+        const modal = document.getElementById('add-transaction-modal');
+        const addTransactionBtn = document.getElementById('add-transaction-btn');
+        const closeButtons = document.querySelectorAll('.close-button');
+
+        addTransactionBtn.onclick = function () {
+            loadCategoriesIntoForm(); // Carrega as categorias ao abrir o modal
+            modal.style.display = 'flex';
+        }
+
+        closeButtons.forEach(btn => {
+            btn.onclick = function () {
+                modal.style.display = 'none';
+            }
+        });
+
+        window.onclick = function (event) {
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // Função para carregar categorias no formulário
+        async function loadCategoriesIntoForm() {
+            const token = localStorage.getItem('authToken');
+            const type = document.getElementById('type').value;
+            const categorySelect = document.getElementById('category');
+
+            try {
+                const response = await fetch(`/api/categories?type=${type}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const categories = await response.json();
+
+                categorySelect.innerHTML = '<option value="">Selecione uma categoria</option>';
+                categories.forEach(cat => {
+                    const option = `<option value="${cat.id}">${cat.name}</option>`;
+                    categorySelect.innerHTML += option;
+                });
+
+            } catch (error) {
+                console.error("Erro ao carregar categorias:", error);
+            }
+        }
+
+        // Adiciona um listener para recarregar as categorias quando o tipo de transação muda
+        document.getElementById('type').addEventListener('change', loadCategoriesIntoForm);
+
+
+        // Lógica para submeter o formulário de nova transação
+        const addTransactionForm = document.getElementById('add-transaction-form');
+        addTransactionForm.addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            const token = localStorage.getItem('authToken');
+            const formData = {
+                description: document.getElementById('description').value,
+                amount: document.getElementById('amount').value,
+                date: document.getElementById('date').value,
+                category_id: document.getElementById('category').value,
+                type: document.getElementById('type').value
+            };
+
+            try {
+                const response = await fetch('/api/transactions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Erro ao adicionar transação');
+                }
+
+                // Se a transação foi adicionada com sucesso
+                modal.style.display = 'none'; // Fecha o modal
+                addTransactionForm.reset(); // Limpa o formulário
+                loadDashboardData(); // Recarrega os dados do dashboard para mostrar a nova transação
+
+            } catch (error) {
+                console.error('Erro ao salvar transação:', error);
+                alert(error.message); // Exibe um alerta simples com o erro
+            }
+        });
+
+        // Função para fazer logout
+        function logout() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userName');
+            window.location.href = 'login.html';
+        }
+
+        document.getElementById('logout-button').addEventListener('click', logout);
+
+        // Evento que é disparado quando o DOM está completamente carregado
+        document.addEventListener('DOMContentLoaded', () => {
+            const userName = localStorage.getItem('userName');
+            if (userName) {
+                document.getElementById('user-name').textContent = userName;
+            }
+            loadDashboardData();
+        });
+        // Gerenciamento do tema escuro
+        document.addEventListener('DOMContentLoaded', function () {
+            const themeToggleBtn = document.getElementById('theme-toggle');
+            const themeIcon = themeToggleBtn.querySelector('i');
+
+            // Verificar preferência salva ou preferência do sistema
+            const savedTheme = localStorage.getItem('theme');
+            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const currentTheme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
+
+            // Aplicar tema
+            if (currentTheme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+                themeToggleBtn.innerHTML = '<i class="fas fa-sun"></i> Modo Claro';
+            }
+
+            // Alternar tema
+            themeToggleBtn.addEventListener('click', function () {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+
+                if (currentTheme === 'dark') {
+                    document.documentElement.removeAttribute('data-theme');
+                    localStorage.setItem('theme', 'light');
+                    themeIcon.classList.remove('fa-sun');
+                    themeIcon.classList.add('fa-moon');
+                    themeToggleBtn.innerHTML = '<i class="fas fa-moon"></i> Modo Escuro';
+                } else {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                    themeIcon.classList.remove('fa-moon');
+                    themeIcon.classList.add('fa-sun');
+                    themeToggleBtn.innerHTML = '<i class="fas fa-sun"></i> Modo Claro';
+                }
+            });
+        });
+        // Função para atualizar os gráficos quando o tema mudar
+        function updateChartsOnThemeChange() {
+            // Esta função deve ser chamada sempre que o tema for alterado
+            if (typeof incomeExpenseChartInstance !== 'undefined') {
+                incomeExpenseChartInstance.destroy();
+                incomeExpenseChartInstance = null;
+            }
+
+            if (typeof expensesChartInstance !== 'undefined') {
+                expensesChartInstance.destroy();
+                expensesChartInstance = null;
+            }
+
+            // Recarregue os dados do dashboard para recriar os gráficos
+            if (typeof loadDashboardData === 'function') {
+                loadDashboardData();
+            }
+        }
+
+        // Modifique o event listener do botão de tema para incluir a atualização dos gráficos
+        themeToggleBtn.addEventListener('click', function () {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+
+            if (currentTheme === 'dark') {
+                document.documentElement.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
+                themeToggleBtn.innerHTML = '<i class="fas fa-moon"></i> Modo Escuro';
+            } else {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+                themeToggleBtn.innerHTML = '<i class="fas fa-sun"></i> Modo Claro';
+            }
+
+            // Atualizar os gráficos após a mudança de tema
+            setTimeout(updateChartsOnThemeChange, 100);
+        });
+    </script>
+</body>
+
+</html>
