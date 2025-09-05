@@ -326,6 +326,217 @@
         [data-theme="dark"] .transactions-table td {
             border-bottom: 1px solid #444;
         }
+        
+        /* Estilos para o Chat Pop-up e Botão Flutuante */
+        .chat-fab {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            width: 60px;
+            height: 60px;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 28px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, background-color 0.3s ease;
+            z-index: 1000;
+        }
+
+        .chat-fab:hover {
+            background-color: var(--secondary);
+            transform: scale(1.1);
+        }
+
+        .chat-popup {
+            position: fixed;
+            bottom: 100px;
+            right: 25px;
+            width: 350px;
+            max-width: 90%;
+            height: 500px;
+            background-color: var(--bg-light);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            display: none;
+            /* Começa escondido */
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 1001;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            transform: translateY(20px);
+            opacity: 0;
+        }
+
+        .chat-popup.show {
+            display: flex;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .chat-header {
+            background-color: var(--primary);
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+        }
+
+        .chat-header h3 {
+            margin: 0;
+            font-size: 1.1em;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .close-chat-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .chat-messages {
+            flex-grow: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .chat-message {
+            padding: 10px 15px;
+            border-radius: 20px;
+            max-width: 80%;
+            line-height: 1.5;
+        }
+
+        .user-message {
+            background-color: var(--accent);
+            /* Alterado de --secondary para --accent */
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
+
+        .bot-message {
+            background-color: #e9eef2;
+            color: var(--dark);
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+
+        .bot-message.loading p {
+            display: flex;
+            align-items: center;
+        }
+
+        .bot-message.loading p::after {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--gray);
+            margin-left: 10px;
+            animation: typing 1s infinite;
+        }
+
+        @keyframes typing {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-4px);
+            }
+        }
+
+
+        .chat-input-area {
+            display: flex;
+            padding: 15px;
+            border-top: 1px solid #ddd;
+        }
+
+        #chat-input {
+            flex-grow: 1;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            padding: 10px 15px;
+            font-size: 1em;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        #chat-input:focus {
+            outline: none;
+            border-color: var(--secondary);
+        }
+
+        #send-chat-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            margin-left: 10px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: background-color 0.3s ease;
+        }
+
+        #send-chat-btn:hover {
+            background-color: var(--accent);
+        }
+
+        /* Dark Mode para o Chat (COM CONTRASTE APRIMORADO) */
+        [data-theme="dark"] .chat-popup {
+            background-color: var(--dark);
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
+        }
+
+        [data-theme="dark"] .chat-header {
+            background-color: #3a4b5c;
+        }
+
+        [data-theme="dark"] .bot-message {
+            /* Fundo mais claro para a mensagem do bot, com texto quase branco */
+            background-color: #4f6272;
+            color: #e1e8ed;
+        }
+
+        [data-theme="dark"] .user-message {
+            /* Alterado para a cor de destaque (accent) para consistência */
+            background-color: var(--accent);
+            color: white;
+        }
+
+        [data-theme="dark"] .chat-input-area {
+            border-top-color: #444;
+            color: #eee;
+        }
+
+        [data-theme="dark"] #chat-input {
+            background-color: #3a4b5c;
+            border-color: #666;
+            color: var(--light);
+        }
+
+        [data-theme="dark"] #chat-input::placeholder {
+            color: #a0a9b3;
+        }
+    </style>
     </style>
 </head>
 
@@ -413,7 +624,25 @@
             </div>
         </div>
     </main>
+    <div id="chat-fab" class="chat-fab">
+        <i class="fas fa-robot"></i>
+    </div>
 
+    <div id="chat-popup" class="chat-popup">
+        <div class="chat-header">
+            <h3>FinanMind Assistant</h3>
+            <button id="close-chat" class="close-chat-btn">&times;</button>
+        </div>
+        <div id="chat-messages" class="chat-messages">
+            <div class="chat-message bot-message">
+                <p>Olá! Sou seu assistente financeiro personalizado. Como posso ajudar você hoje?</p>
+            </div>
+        </div>
+        <div class="chat-input-area">
+            <input type="text" id="chat-input" placeholder="Digite sua mensagem...">
+            <button id="send-chat-btn"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const token = localStorage.getItem('authToken');
@@ -654,6 +883,104 @@
 
             // Atualizar os gráficos após a mudança de tema
             setTimeout(updateChartsOnThemeChange, 100);
+        });
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const chatFab = document.getElementById('chat-fab');
+            const chatPopup = document.getElementById('chat-popup');
+            const closeChatBtn = document.getElementById('close-chat');
+            const sendChatBtn = document.getElementById('send-chat-btn');
+            const chatInput = document.getElementById('chat-input');
+            const chatMessages = document.getElementById('chat-messages');
+
+            const GEMINI_API_KEY = 'AIzaSyD3GDnZxjKhr3N6MOo4yGuaoaAF_IZ_ioY';
+            const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`;
+
+            // Histórico da conversa para manter o contexto
+            let conversationHistory = [
+                {
+                    role: "user",
+                    parts: [{ text: "Você é um assistente financeiro chamado FinanMind Assistant. Sua especialidade é dar conselhos sobre gestão financeira, finanças pessoais, e investimentos. Seja direto, informativo e amigável. Não responda sobre tópicos que não sejam relacionados a finanças." }],
+                },
+                {
+                    role: "model",
+                    parts: [{ text: "Entendido! Estou pronto para ajudar com finanças." }],
+                }
+            ];
+
+            // Abre o pop-up de chat
+            chatFab.addEventListener('click', () => {
+                chatPopup.classList.add('show');
+            });
+
+            // Fecha o pop-up de chat
+            closeChatBtn.addEventListener('click', () => {
+                chatPopup.classList.remove('show');
+            });
+
+            // Envia a mensagem ao pressionar Enter
+            chatInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+
+            // Envia a mensagem ao clicar no botão
+            sendChatBtn.addEventListener('click', sendMessage);
+
+            function addMessage(text, sender) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `chat-message ${sender}-message`;
+                messageDiv.innerHTML = `<p>${text}</p>`; // Usamos innerHTML para permitir formatação futura
+                chatMessages.appendChild(messageDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight; // Rola para a mensagem mais recente
+                return messageDiv;
+            }
+
+            async function sendMessage() {
+                const userText = chatInput.value.trim();
+                if (userText === '') return;
+
+                addMessage(userText, 'user');
+                chatInput.value = '';
+
+                // Adiciona uma mensagem de "digitando..."
+                const loadingMessage = addMessage('...', 'bot loading');
+
+                try {
+                    // Adiciona a mensagem do usuário ao histórico
+                    conversationHistory.push({ role: "user", parts: [{ text: userText }] });
+
+                    const response = await fetch(GEMINI_API_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            contents: conversationHistory
+                        }),
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Erro na API: ${response.statusText}`);
+                    }
+
+                    const data = await response.json();
+                    const botText = data.candidates[0].content.parts[0].text;
+
+                    // Adiciona a resposta do bot ao histórico
+                    conversationHistory.push({ role: "model", parts: [{ text: botText }] });
+
+                    // Remove a mensagem de "digitando..." e adiciona a resposta final
+                    loadingMessage.remove();
+                    addMessage(botText.replace(/\n/g, '<br>'), 'bot'); // Converte quebras de linha em <br>
+
+                } catch (error) {
+                    console.error('Erro ao se comunicar com a API do Gemini:', error);
+                    loadingMessage.remove();
+                    addMessage('Desculpe, não consegui me conectar ao meu cérebro. Tente novamente mais tarde.', 'bot');
+                }
+            }
         });
     </script>
 </body>
