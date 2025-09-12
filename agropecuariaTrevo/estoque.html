@@ -8,6 +8,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Font Awesome para ícones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         /* Paleta de Cores e Variáveis Globais */
         :root {
@@ -209,8 +211,18 @@
         /* Estilo para linhas da tabela com base no vencimento */
         .product-table tr.near-expiry { background-color: rgba(255, 179, 0, 0.15); }
         .product-table tr.expired { background-color: rgba(229, 57, 53, 0.15); }
-        .product-table tr:hover { background-color: var(--bg-light);}
+        .product-table tr:hover { background-color: #f5f5f5; }
         
+        /* Estilos de cor para Lucro */
+        .profit-low { color: var(--danger); font-weight: 600; }
+        .profit-medium { color: var(--warning-dark); font-weight: 500; }
+        .profit-high { color: var(--success); font-weight: 600; }
+
+        /* Estilos de cor para Estoque */
+        .stock-out { color: var(--danger); font-weight: 600; }
+        .stock-low { color: var(--warning-dark); font-weight: 500; }
+        .stock-in { color: var(--success); }
+
         /* Botões de Ação na Tabela */
         .action-buttons button {
             background: none;
@@ -395,11 +407,11 @@
     <aside class="sidebar">
         <div class="logo"><i class="fas fa-horse-head"></i> AgroVET</div>
         <nav class="menu">
-            <a href="agro-estoque.html"><i class="fas fa-chart-pie"></i> Dashboard</a>
+            <a href="dashboard_agrovet.html"><i class="fas fa-chart-pie"></i> Dashboard</a>
             <a href="estoque.html" class="active"><i class="fas fa-boxes-stacked"></i> Estoque</a>
-            <a><i class="fas fa-truck-field"></i> Fornecedores</a>
-            <a><i class="fas fa-cash-register"></i> Vendas</a>
-            <a><i class="fas fa-file-alt"></i> Relatórios</a>
+            <a href="fornecedores.html"><i class="fas fa-truck-field"></i> Fornecedores</a>
+            <a href="vendas.html"><i class="fas fa-cash-register"></i> Vendas</a>
+            <a href="relatorios.html"><i class="fas fa-file-alt"></i> Relatórios</a>
             <a><i class="fas fa-cog"></i> Configurações</a>
         </nav>
     </aside>
@@ -443,12 +455,13 @@
                 <thead>
                     <tr>
                         <th data-sort="name">Produto <span class="sort-icon"></span></th>
+                        <th data-sort="supplier">Fornecedor <span class="sort-icon"></span></th>
                         <th>Categoria</th>
                         <th data-sort="quantity">Estoque <span class="sort-icon"></span></th>
                         <th data-sort="cost">Custo Unit. <span class="sort-icon"></span></th>
                         <th data-sort="price">Venda Unit. <span class="sort-icon"></span></th>
                         <th>Total (Custo)</th>
-                        <th>Total (Venda)</th>
+                        <th data-sort="profitMargin">Lucro (%) <span class="sort-icon"></span></th>
                         <th data-sort="expiryDate">Vencimento <span class="sort-icon"></span></th>
                         <th>Ações</th>
                     </tr>
@@ -476,6 +489,13 @@
                 <div class="form-group">
                     <label for="product-name">Nome do Produto <span class="required">*</span></label>
                     <input type="text" id="product-name" placeholder="Ex: Ração Premium para Cães Adultos 15kg" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="product-supplier">Fornecedor</label>
+                    <select id="product-supplier" required>
+                        <option value="" disabled selected>Selecione um fornecedor</option>
+                    </select>
                 </div>
 
                 <div class="form-row">
@@ -537,7 +557,7 @@
                         <label for="product-price">Preço de Venda (R$) <span class="required">*</span></label>
                         <input type="number" id="product-price" step="0.01" min="0" placeholder="0.00" required>
                     </div>
-                    <div class="form-group hidden" id="unit-price-group">
+                     <div class="form-group hidden" id="unit-price-group">
                         <label for="product-unit-price">Preço por Unidade (R$)</label>
                         <input type="text" id="product-unit-price" readonly placeholder="Cálculo automático">
                     </div>
@@ -552,21 +572,15 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // --- DADOS MOCK (EXEMPLO) ---
-            const initialProducts = [
-                {id: 1, name: 'Ração Cães Adultos 15kg', category: 'Ração (Pet)', unit: 'KG', quantity: 8, packageQuantity: null, weightVolume: 15, cost: 85.50, price: 129.90, expiryDate: '2026-10-20'},
-                {id: 2, name: 'Vacina V10 Importada', category: 'Medicamentos (Pet)', unit: 'UN', quantity: 25, packageQuantity: null, weightVolume: null, cost: 22.00, price: 45.00, expiryDate: '2025-10-30'},
-                {id: 3, name: 'Ivermectina 100ml', category: 'Medicamentos (Grande Porte)', unit: 'UN', quantity: 5, packageQuantity: null, weightVolume: null, cost: 45.00, price: 79.90, expiryDate: '2024-08-15'},
-                {id: 4, name: 'Coleira Antipulgas M', category: 'Acessórios (Pet)', unit: 'UN', quantity: 0, packageQuantity: null, weightVolume: null, cost: 50.00, price: 99.90, expiryDate: null},
-                {id: 5, name: 'Shampoo Neutro 5L', category: 'Higiene e Beleza', unit: 'L', quantity: 12, packageQuantity: null, weightVolume: 5, cost: 35.00, price: 65.00, expiryDate: null},
-                {id: 6, name: 'Sal Mineral 40kg', category: 'Suplementos (Grande Porte)', unit: 'SC', quantity: 30, packageQuantity: null, weightVolume: 40, cost: 55.00, price: 89.00, expiryDate: '2027-01-01'},
-            ];
+        document.addEventListener('DOMContentLoaded', async () => {
+             // --- CONFIGURAÇÃO DO SUPABASE ---
+            const SUPABASE_URL = 'https://jsnrvkmdogvbqjxwjyzc.supabase.co'; 
+            const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzbnJ2a21kb2d2YnFqeHdqeXpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc2OTcxNTksImV4cCI6MjA3MzI3MzE1OX0.cMEwu00R5bJwWOlY-CKts05gk_1dRQ-NSOTUdnKTWgQ';
 
-            // --- VARIÁVEIS GLOBAIS ---
-            let products = JSON.parse(localStorage.getItem('products')) || initialProducts;
-            if (JSON.parse(localStorage.getItem('products')) === null) localStorage.setItem('products', JSON.stringify(products));
+            const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             
+            // --- VARIÁVEIS GLOBAIS ---
+            let products = [];
             let currentPage = 1;
             const ITEMS_PER_PAGE = 10;
             let currentSort = { key: 'name', order: 'asc' };
@@ -578,17 +592,16 @@
             const productForm = document.getElementById('product-form');
             const stockTableBody = document.getElementById('stock-table-body');
             const paginationContainer = document.getElementById('pagination-container');
-            // Filtros e Ordenação
             const searchInput = document.getElementById('search-product');
             const filterCategory = document.getElementById('filter-category');
             const filterStockStatus = document.getElementById('filter-stock-status');
             const filterExpiryStatus = document.getElementById('filter-expiry-status');
             const tableHeaders = document.querySelectorAll('#estoque-page .product-table th[data-sort]');
             
-            // Campos do Formulário
             const formFields = {
                 id: document.getElementById('product-id'),
                 name: document.getElementById('product-name'),
+                supplier: document.getElementById('product-supplier'),
                 category: document.getElementById('product-category'),
                 unit: document.getElementById('product-unit'),
                 quantity: document.getElementById('product-quantity'),
@@ -616,21 +629,16 @@
             };
 
             // --- LÓGICA DO MODAL ---
-            const openModal = () => {
-                modal.style.display = 'flex';
-                setTimeout(() => formFields.name.focus(), 50);
-            };
+            const openModal = () => { modal.style.display = 'flex'; setTimeout(() => formFields.name.focus(), 50); };
             const closeModal = () => modal.style.display = 'none';
 
             const updateConditionalFields = () => {
                 const selectedUnit = formFields.unit.value;
                 const isPackageOrBox = ['PC', 'CX'].includes(selectedUnit);
                 const needsWeightVolume = ['KG', 'L', 'SC'].includes(selectedUnit);
-
                 formFields.packageQuantityGroup.classList.toggle('hidden', !isPackageOrBox);
                 formFields.unitPriceGroup.classList.toggle('hidden', !isPackageOrBox);
                 formFields.weightVolumeGroup.classList.toggle('hidden', !needsWeightVolume);
-
                 if (needsWeightVolume) {
                     const label = formFields.weightVolumeGroup.querySelector('label');
                     const unitSpan = document.getElementById('weight-volume-unit-label');
@@ -642,7 +650,6 @@
                         unitSpan.textContent = `(${selectedUnit})`;
                     }
                 }
-                
                 if (!isPackageOrBox) { formFields.packageQuantity.value = ''; formFields.unitPrice.value = ''; }
                 if (!needsWeightVolume) { formFields.weightVolume.value = ''; }
             };
@@ -653,36 +660,80 @@
                 formFields.unitPrice.value = (price > 0 && packageQty > 0) ? formatCurrency(price / packageQty) : '';
             };
 
-            // --- CRUD ---
-            const saveProducts = () => localStorage.setItem('products', JSON.stringify(products));
+            // --- CRUD COM SUPABASE ---
+            const fetchProducts = async () => {
+                const { data, error } = await supabase.from('products').select('*');
+                if (error) {
+                    console.error('Erro ao buscar produtos:', error);
+                    return [];
+                }
+                return data;
+            };
 
-            const handleFormSubmit = (e) => {
-                e.preventDefault();
-                const productData = {
-                    id: formFields.id.value ? Number(formFields.id.value) : Date.now(),
-                    name: formFields.name.value, category: formFields.category.value,
-                    unit: formFields.unit.value, quantity: parseInt(formFields.quantity.value) || 0,
-                    packageQuantity: parseInt(formFields.packageQuantity.value) || null,
-                    weightVolume: parseFloat(formFields.weightVolume.value) || null,
-                    cost: parseFloat(formFields.cost.value) || 0, price: parseFloat(formFields.price.value) || 0,
-                    expiryDate: formFields.expiry.value,
-                };
-
-                const index = products.findIndex(p => p.id == formFields.id.value);
-                if (index > -1) {
-                    products[index] = productData;
-                } else {
-                    products.push(productData);
+            const fetchAndPopulateSuppliersDropdown = async () => {
+                const { data: suppliers, error } = await supabase.from('suppliers').select('name').order('name', { ascending: true });
+                if (error) {
+                    console.error('Erro ao buscar fornecedores:', error);
+                    return;
+                }
+                
+                const dropdown = formFields.supplier;
+                while (dropdown.options.length > 1) {
+                    dropdown.remove(1);
                 }
 
-                saveProducts();
-                renderStockPage();
-                closeModal();
+                suppliers.forEach(s => {
+                    const option = document.createElement('option');
+                    option.value = s.name;
+                    option.textContent = s.name;
+                    dropdown.appendChild(option);
+                });
+            };
+            
+            const handleFormSubmit = async (e) => {
+                e.preventDefault();
+                formFields.saveBtn.disabled = true;
+                formFields.saveBtn.textContent = 'Salvando...';
+                const getNullOrNumber = (value) => value === '' || isNaN(parseFloat(value)) ? null : parseFloat(value);
+                const getNullOrInt = (value) => value === '' || isNaN(parseInt(value)) ? null : parseInt(value);
+                const getNullOrDate = (value) => value === '' ? null : value;
+                const getNullOrText = (value) => value.trim() === '' ? null : value.trim();
+
+                const productData = {
+                    name: formFields.name.value,
+                    supplier: getNullOrText(formFields.supplier.value),
+                    category: formFields.category.value,
+                    unit: formFields.unit.value,
+                    quantity: getNullOrInt(formFields.quantity.value) || 0,
+                    packageQuantity: getNullOrInt(formFields.packageQuantity.value),
+                    weightVolume: getNullOrNumber(formFields.weightVolume.value),
+                    cost: getNullOrNumber(formFields.cost.value) || 0,
+                    price: getNullOrNumber(formFields.price.value) || 0,
+                    expiryDate: getNullOrDate(formFields.expiry.value),
+                };
+
+                let response;
+                if (formFields.id.value) { // Update
+                    response = await supabase.from('products').update(productData).eq('id', formFields.id.value);
+                } else { // Insert
+                    response = await supabase.from('products').insert([productData]);
+                }
+
+                if (response.error) {
+                    console.error('Erro ao salvar produto:', response.error);
+                    alert(`Erro ao salvar: ${response.error.message}`);
+                } else {
+                    closeModal();
+                    await fetchAndRenderAll();
+                }
+                formFields.saveBtn.disabled = false;
+                formFields.saveBtn.textContent = 'Salvar';
             };
 
             const populateForm = (product) => {
                 formFields.id.value = product.id;
                 formFields.name.value = product.name;
+                formFields.supplier.value = product.supplier || '';
                 formFields.category.value = product.category;
                 formFields.unit.value = product.unit;
                 formFields.quantity.value = product.quantity;
@@ -693,17 +744,20 @@
                 formFields.expiry.value = product.expiryDate || '';
                 formFields.modalTitle.textContent = 'Editar Produto';
                 formFields.saveBtn.textContent = 'Atualizar';
-
                 updateConditionalFields();
                 calculateUnitPrice();
                 openModal();
             };
 
-            const deleteProduct = (id) => {
+            const deleteProduct = async (id) => {
                 if (confirm('Tem certeza que deseja excluir este produto?')) {
-                    products = products.filter(p => p.id != id);
-                    saveProducts();
-                    renderStockPage();
+                    const { error } = await supabase.from('products').delete().eq('id', id);
+                    if (error) {
+                        console.error('Erro ao deletar produto:', error);
+                        alert(`Erro ao deletar: ${error.message}`);
+                    } else {
+                        await fetchAndRenderAll();
+                    }
                 }
             };
             
@@ -715,9 +769,8 @@
                 const expiryStatus = filterExpiryStatus.value;
 
                 let filtered = products.filter(p => {
-                    const nameMatch = p.name.toLowerCase().includes(searchTerm);
+                    const nameMatch = p.name.toLowerCase().includes(searchTerm) || (p.supplier && p.supplier.toLowerCase().includes(searchTerm));
                     const categoryMatch = category === 'all' || p.category === category;
-                    
                     let stockMatch = true;
                     if (stockStatus === 'in-stock') stockMatch = p.quantity > LOW_STOCK_THRESHOLD;
                     else if (stockStatus === 'low-stock') stockMatch = p.quantity > 0 && p.quantity <= LOW_STOCK_THRESHOLD;
@@ -736,18 +789,28 @@
                             else if (expiryStatus === 'ok') expiryMatch = diffDays > NEAR_EXPIRY_DAYS;
                         }
                     }
-                    
                     return nameMatch && categoryMatch && stockMatch && expiryMatch;
                 });
                 
-                // Ordenação
                 return filtered.sort((a, b) => {
-                    let valA = a[currentSort.key];
-                    let valB = b[currentSort.key];
+                    const getProfitMargin = (p) => {
+                        if (p.price > 0 && p.cost > 0) {
+                            return ((p.price - p.cost) / p.price) * 100;
+                        }
+                        return -Infinity;
+                    };
+
+                    let valA = currentSort.key === 'profitMargin' ? getProfitMargin(a) : a[currentSort.key];
+                    let valB = currentSort.key === 'profitMargin' ? getProfitMargin(b) : b[currentSort.key];
+
                     if (typeof valA === 'string') {
-                        valA = valA.toLowerCase();
-                        valB = b[currentSort.key].toLowerCase();
+                        valA = (valA || '').toLowerCase();
+                        valB = (valB || '').toLowerCase();
+                    } else {
+                        valA = valA === null ? -Infinity : valA;
+                        valB = valB === null ? -Infinity : valB;
                     }
+
                     if (valA < valB) return currentSort.order === 'asc' ? -1 : 1;
                     if (valA > valB) return currentSort.order === 'asc' ? 1 : -1;
                     return 0;
@@ -757,17 +820,15 @@
             const renderStockPage = () => {
                 const processedProducts = getFilteredAndSortedProducts();
                 stockTableBody.innerHTML = '';
-
                 const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
                 const endIndex = startIndex + ITEMS_PER_PAGE;
                 const paginatedItems = processedProducts.slice(startIndex, endIndex);
 
                 if (paginatedItems.length === 0) {
-                     stockTableBody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding: 20px;">Nenhum produto encontrado com os filtros atuais.</td></tr>`;
+                     stockTableBody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding: 20px;">Nenhum produto encontrado.</td></tr>`;
                 } else {
                     paginatedItems.forEach(product => {
                         const tr = document.createElement('tr');
-                        
                          if (product.expiryDate) {
                             const today = new Date(); today.setHours(0,0,0,0);
                             const expiry = new Date(product.expiryDate);
@@ -775,29 +836,53 @@
                             if (diffDays < 0) tr.classList.add('expired');
                             else if (diffDays <= NEAR_EXPIRY_DAYS) tr.classList.add('near-expiry');
                         }
+                        
+                        let stockClass = '';
+                        if (product.quantity <= 0) {
+                            stockClass = 'stock-out';
+                        } else if (product.quantity <= LOW_STOCK_THRESHOLD) {
+                            stockClass = 'stock-low';
+                        } else {
+                            stockClass = 'stock-in';
+                        }
+                        
+                        let stockDisplay = `<span class="${stockClass}">${product.quantity} ${product.unit}</span>`;
 
-                        let stockDisplay = `${product.quantity} ${product.unit}`;
                         if ((product.unit === 'PC' || product.unit === 'CX') && product.packageQuantity) {
-                            stockDisplay = `${product.quantity} ${product.unit} <br><small>(${product.quantity * product.packageQuantity} un.)</small>`;
+                            stockDisplay += ` <br><small>(${product.quantity * product.packageQuantity} un.)</small>`;
                         } else if ((product.unit === 'KG' || product.unit === 'L' || product.unit === 'SC') && product.weightVolume) {
                             const unitLabel = product.unit === 'SC' ? 'KG' : product.unit;
-                            stockDisplay = `${product.quantity} ${product.unit}<br><small>(${(product.quantity * product.weightVolume).toLocaleString('pt-BR')} ${unitLabel} total)</small>`;
+                            stockDisplay += `<br><small>(${(product.quantity * product.weightVolume).toLocaleString('pt-BR')} ${unitLabel} total)</small>`;
+                        }
+
+                        let profitMarginDisplay = '---';
+                        let profitClass = '';
+                        if (product.price > 0 && product.cost > 0) {
+                            const profitMargin = ((product.price - product.cost) / product.price) * 100;
+                            profitMarginDisplay = `${profitMargin.toFixed(2).replace('.', ',')}%`;
+                            if(profitMargin < 20) {
+                                profitClass = 'profit-low';
+                            } else if (profitMargin >= 20 && profitMargin < 50) {
+                                profitClass = 'profit-medium';
+                            } else {
+                                profitClass = 'profit-high';
+                            }
                         }
 
                         tr.innerHTML = `
                             <td>${product.name}</td>
+                            <td>${product.supplier || '---'}</td>
                             <td>${product.category}</td>
                             <td>${stockDisplay}</td>
                             <td>${formatCurrency(product.cost)}</td>
                             <td>${formatCurrency(product.price)}</td>
                             <td>${formatCurrency(product.cost * product.quantity)}</td>
-                            <td>${formatCurrency(product.price * product.quantity)}</td>
+                            <td class="${profitClass}">${profitMarginDisplay}</td>
                             <td>${formatDate(product.expiryDate)}</td>
                             <td class="action-buttons">
                                 <button class="edit-btn" data-id="${product.id}"><i class="fas fa-pencil-alt"></i></button>
                                 <button class="delete-btn" data-id="${product.id}"><i class="fas fa-trash-alt"></i></button>
-                            </td>
-                        `;
+                            </td>`;
                         stockTableBody.appendChild(tr);
                     });
                 }
@@ -808,42 +893,30 @@
                 const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
                 paginationContainer.innerHTML = '';
                 if (totalPages <= 1) return;
-
-                // Botão Anterior
                 const prevButton = document.createElement('button');
                 prevButton.innerHTML = '&laquo;';
                 prevButton.disabled = currentPage === 1;
-                prevButton.addEventListener('click', () => {
-                    currentPage--;
-                    renderStockPage();
-                });
+                prevButton.addEventListener('click', () => { currentPage--; renderStockPage(); });
                 paginationContainer.appendChild(prevButton);
-
-                // Botões de Página
                 for (let i = 1; i <= totalPages; i++) {
                     const pageButton = document.createElement('button');
                     pageButton.textContent = i;
                     if (i === currentPage) pageButton.classList.add('active');
-                    pageButton.addEventListener('click', () => {
-                        currentPage = i;
-                        renderStockPage();
-                    });
+                    pageButton.addEventListener('click', () => { currentPage = i; renderStockPage(); });
                     paginationContainer.appendChild(pageButton);
                 }
-                
-                // Botão Próximo
                 const nextButton = document.createElement('button');
                 nextButton.innerHTML = '&raquo;';
                 nextButton.disabled = currentPage === totalPages;
-                nextButton.addEventListener('click', () => {
-                    currentPage++;
-                    renderStockPage();
-                });
+                nextButton.addEventListener('click', () => { currentPage++; renderStockPage(); });
                 paginationContainer.appendChild(nextButton);
             };
 
             const populateCategoryFilter = () => {
                 const categories = [...new Set(products.map(p => p.category))].sort();
+                while (filterCategory.options.length > 1) {
+                    filterCategory.remove(1);
+                }
                 categories.forEach(cat => {
                     const option = document.createElement('option');
                     option.value = cat;
@@ -851,25 +924,30 @@
                     filterCategory.appendChild(option);
                 });
             };
+            
+            const fetchAndRenderAll = async () => {
+                products = await fetchProducts();
+                populateCategoryFilter();
+                renderStockPage();
+            };
 
             // --- INICIALIZAÇÃO E EVENT LISTENERS ---
-            const init = () => {
-                // Botão de Adicionar Produto
+            const init = async () => {
+                await fetchAndPopulateSuppliersDropdown();
+                
                 document.getElementById('add-product-btn-stock').addEventListener('click', () => {
                     productForm.reset();
                     formFields.id.value = '';
                     formFields.modalTitle.textContent = 'Novo Produto';
-                    formFields.saveBtn.textContent = 'Salvar'
+                    formFields.saveBtn.textContent = 'Salvar';
                     updateConditionalFields();
                     openModal();
                 });
                 
-                // Ações do Modal
                 document.querySelectorAll('.close-button').forEach(btn => btn.addEventListener('click', closeModal));
                 modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
                 productForm.addEventListener('submit', handleFormSubmit);
 
-                // Ações da Tabela
                 stockTableBody.addEventListener('click', (e) => {
                     const editBtn = e.target.closest('.edit-btn');
                     const deleteBtn = e.target.closest('.delete-btn');
@@ -882,7 +960,6 @@
                     }
                 });
                 
-                // Filtros e Ordenação
                 [searchInput, filterCategory, filterStockStatus, filterExpiryStatus].forEach(el => {
                     el.addEventListener('input', () => {
                         currentPage = 1;
@@ -903,7 +980,6 @@
                     });
                 });
                 
-                // Campos condicionais do formulário
                 formFields.unit.addEventListener('change', updateConditionalFields);
                 formFields.price.addEventListener('input', calculateUnitPrice);
                 formFields.packageQuantity.addEventListener('input', calculateUnitPrice);
@@ -915,8 +991,7 @@
                     formFields.unit.dispatchEvent(new Event('change'));
                 });
 
-                populateCategoryFilter();
-                renderStockPage();
+                fetchAndRenderAll();
             };
 
             init();
@@ -924,3 +999,5 @@
     </script>
 </body>
 </html>
+
+    
