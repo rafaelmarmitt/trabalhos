@@ -74,7 +74,12 @@
             margin-right: 10px;
         }
 
-        .sidebar .menu a {
+        .sidebar .menu {
+            flex-grow: 1;
+        }
+
+        .sidebar .menu a,
+        .sidebar .logout-link a {
             display: flex;
             align-items: center;
             padding: 12px 15px;
@@ -87,12 +92,14 @@
         }
 
         .sidebar .menu a.active,
-        .sidebar .menu a:hover {
+        .sidebar .menu a:hover,
+        .sidebar .logout-link a:hover {
             background-color: var(--primary);
             color: white;
         }
 
-        .sidebar .menu a i {
+        .sidebar .menu a i,
+        .sidebar .logout-link a i {
             margin-right: 15px;
             width: 20px;
             text-align: center;
@@ -159,23 +166,27 @@
             border-bottom: 1px solid var(--border-color);
         }
 
-        .filter-group,
-        .sort-group {
+        .filter-group {
             display: flex;
-            gap: 10px;
-            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: flex-end;
         }
 
-        .filter-group label,
-        .sort-group label {
-            font-weight: 500;
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-group label {
+            margin-bottom: 5px;
             font-size: 14px;
+            font-weight: 500;
             color: var(--gray);
         }
 
         .filter-group select,
-        .sort-group select,
-        #search-product {
+        .filter-group input {
             padding: 8px 12px;
             border-radius: 8px;
             border: 1px solid var(--border-color);
@@ -184,6 +195,12 @@
         }
 
         /* Tabela de Produtos */
+        .table-wrapper {
+            max-height: 60vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
         .product-table {
             width: 100%;
             border-collapse: collapse;
@@ -209,6 +226,10 @@
             cursor: pointer;
             user-select: none;
             white-space: nowrap;
+            position: sticky;
+            top: 0;
+            background-color: var(--light);
+            z-index: 10;
         }
 
         .product-table th:hover {
@@ -241,7 +262,11 @@
             color: var(--primary);
         }
 
-        /* Estilo para linhas da tabela com base no vencimento */
+        /* Estilo para linhas da tabela com base no status */
+        .product-table tr.low-stock:not(.near-expiry):not(.expired) {
+            background-color: rgba(255, 179, 0, 0.10);
+        }
+
         .product-table tr.near-expiry {
             background-color: rgba(255, 179, 0, 0.15);
         }
@@ -252,6 +277,10 @@
 
         .product-table tr:hover {
             background-color: #f5f5f5;
+        }
+
+        .product-table tr.selected {
+            background-color: #e3f2fd;
         }
 
         /* Estilos de cor para Lucro */
@@ -285,6 +314,46 @@
             color: var(--success);
         }
 
+        /* Estilos de cor para Data de Vencimento */
+        .expiry-expired {
+            color: var(--danger);
+            font-weight: 600;
+        }
+
+        .expiry-near {
+            color: var(--warning-dark);
+            font-weight: 500;
+        }
+
+        .expiry-ok {
+            color: var(--success);
+        }
+
+        /* Status Badges */
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+            white-space: nowrap;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+
+        .status-low {
+            background-color: var(--warning);
+        }
+
+        .status-expiry {
+            background-color: var(--warning-dark);
+        }
+
+        .status-expired {
+            background-color: var(--danger);
+        }
+
         /* Botões de Ação na Tabela */
         .action-buttons button {
             background: none;
@@ -305,11 +374,20 @@
         }
 
         /* Paginação */
-        .pagination {
+        .pagination-container {
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between;
             align-items: center;
             margin-top: 20px;
+        }
+
+        .pagination-summary {
+            font-size: 14px;
+            color: var(--gray);
+        }
+
+        .pagination {
+            display: flex;
             gap: 5px;
         }
 
@@ -461,7 +539,10 @@
             cursor: pointer;
             font-size: 16px;
             font-weight: 500;
-            transition: background-color 0.3s, transform 0.1s;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .btn:active {
@@ -478,19 +559,51 @@
         }
 
         .btn-secondary {
-            background-color: #e0e0e0;
-            color: var(--dark);
+            background-color: transparent;
+            border: 1px solid var(--gray);
+            color: var(--gray);
+            font-weight: 600;
         }
 
         .btn-secondary:hover {
-            background-color: #bdbdbd;
+            background-color: var(--gray);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-delete-mass {
+            background-color: #ffebee;
+            border: 1px solid var(--danger);
+            color: var(--danger);
+            font-weight: 600;
+        }
+
+        .btn-delete-mass:hover {
+            background-color: var(--danger);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(229, 57, 53, 0.2);
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
         }
     </style>
 </head>
 
 <body>
     <aside class="sidebar">
-        <div class="logo"><i class="fas fa-horse-head"></i> AgroVET</div>
+       <div class="logo"><i class="fas fa-clover"></i> AgroTrevo</div>
         <nav class="menu">
             <a href="dashboard_agrovet.html"><i class="fas fa-chart-pie"></i> Dashboard</a>
             <a href="estoque.html" class="active"><i class="fas fa-boxes-stacked"></i> Estoque</a>
@@ -499,6 +612,9 @@
             <a href="relatorios.html"><i class="fas fa-file-alt"></i> Relatórios</a>
             <a href="configuracoes.html"><i class="fas fa-cog"></i> Configurações</a>
         </nav>
+        <div class="logout-link">
+            <a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Sair</a>
+        </div>
     </aside>
 
     <!-- PÁGINA ESTOQUE -->
@@ -510,54 +626,82 @@
                     Produto</button>
                 <div class="user-profile">
                     <img src="https://i.pravatar.cc/150?u=agroadmin" alt="User">
-                    <span>Admin</span>
+                    <span id="user-display"></span>
                 </div>
             </div>
         </header>
         <div class="stock-page-container">
             <div class="stock-controls">
                 <div class="filter-group">
-                    <input type="text" id="search-product" placeholder="🔍 Buscar produto...">
-                    <select id="filter-category">
-                        <option value="all">Todas as Categorias</option>
-                        <!-- Options preenchidas por JS -->
-                    </select>
-                    <select id="filter-stock-status">
-                        <option value="all">Todos os Status</option>
-                        <option value="in-stock">Em Estoque</option>
-                        <option value="low-stock">Baixo Estoque</option>
-                        <option value="out-of-stock">Sem Estoque</option>
-                    </select>
-                    <select id="filter-expiry-status">
-                        <option value="all">Vencimento</option>
-                        <option value="ok">OK</option>
-                        <option value="near">Próximo</option>
-                        <option value="expired">Vencido</option>
-                    </select>
+                    <div class="input-group">
+                        <label for="search-product">Buscar Produto</label>
+                        <input type="text" id="search-product" placeholder="Nome ou fornecedor...">
+                    </div>
+                    <div class="input-group">
+                        <label for="filter-category">Categoria</label>
+                        <select id="filter-category">
+                            <option value="all">Todas</option>
+                            <!-- Options preenchidas por JS -->
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="filter-stock-status">Status do Estoque</label>
+                        <select id="filter-stock-status">
+                            <option value="all">Todos</option>
+                            <option value="in-stock">Em Estoque</option>
+                            <option value="low-stock">Baixo Estoque</option>
+                            <option value="out-of-stock">Sem Estoque</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="filter-expiry-status">Vencimento</label>
+                        <select id="filter-expiry-status">
+                            <option value="all">Todos</option>
+                            <option value="ok">OK</option>
+                            <option value="near">Próximo</option>
+                            <option value="expired">Vencido</option>
+                        </select>
+                    </div>
+                    <button id="clear-filters-btn" class="btn btn-secondary"><i class="fas fa-times"></i>
+                        Limpar</button>
+                </div>
+                <div>
+                    <button id="delete-selected-btn" class="btn btn-delete-mass" style="display: none;"><i
+                            class="fas fa-trash"></i> Excluir Selecionados</button>
                 </div>
             </div>
 
-            <table class="product-table">
-                <thead>
-                    <tr>
-                        <th data-sort="name">Produto <span class="sort-icon"></span></th>
-                        <th data-sort="supplier">Fornecedor <span class="sort-icon"></span></th>
-                        <th>Categoria</th>
-                        <th data-sort="quantity">Estoque <span class="sort-icon"></span></th>
-                        <th data-sort="cost">Custo Unit. <span class="sort-icon"></span></th>
-                        <th data-sort="price">Venda Unit. <span class="sort-icon"></span></th>
-                        <th>Total (Custo)</th>
-                        <th data-sort="profitMargin">Lucro (%) <span class="sort-icon"></span></th>
-                        <th data-sort="expiryDate">Vencimento <span class="sort-icon"></span></th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody id="stock-table-body">
-                    <!-- Conteúdo da tabela de estoque gerado por JS -->
-                </tbody>
-            </table>
-            <div class="pagination" id="pagination-container">
-                <!-- Controles de paginação gerados por JS -->
+            <div class="table-wrapper">
+                <div id="loading-indicator" class="loading-overlay" style="display: none;">
+                    <p>Carregando produtos...</p>
+                </div>
+                <table class="product-table">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="select-all-checkbox"></th>
+                            <th data-sort="name">Produto <span class="sort-icon"></span></th>
+                            <th>Status</th>
+                            <th data-sort="supplier">Fornecedor <span class="sort-icon"></span></th>
+                            <th>Categoria</th>
+                            <th data-sort="quantity">Estoque <span class="sort-icon"></span></th>
+                            <th data-sort="cost">Custo Unit. <span class="sort-icon"></span></th>
+                            <th data-sort="price">Venda Unit. <span class="sort-icon"></span></th>
+                            <th>Total (Custo)</th>
+                            <th data-sort="profitMargin">Lucro (%) <span class="sort-icon"></span></th>
+                            <th data-sort="expiryDate">Vencimento <span class="sort-icon"></span></th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stock-table-body">
+                        <!-- Conteúdo da tabela de estoque gerado por JS -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="pagination-container">
+                <span id="pagination-summary" class="pagination-summary"></span>
+                <div class="pagination" id="pagination-buttons">
+                    <!-- Controles de paginação gerados por JS -->
+                </div>
             </div>
         </div>
     </main>
@@ -665,6 +809,22 @@
             const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzbnJ2a21kb2d2YnFqeHdqeXpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc2OTcxNTksImV4cCI6MjA3MzI3MzE1OX0.cMEwu00R5bJwWOlY-CKts05gk_1dRQ-NSOTUdnKTWgQ';
             const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+            // --- VERIFICAÇÃO DE AUTENTICAÇÃO ---
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                window.location.href = 'index.html';
+                return;
+            }
+            document.getElementById('user-display').textContent = session.user.email;
+
+            // --- LOGOUT ---
+            document.getElementById('logout-btn').addEventListener('click', async (e) => {
+                e.preventDefault();
+                const { error } = await supabase.auth.signOut();
+                if (error) console.error('Erro ao sair:', error);
+                else window.location.href = 'index.html';
+            });
+
             // --- VARIÁVEIS GLOBAIS ---
             let products = [];
             let currentPage = 1;
@@ -677,12 +837,18 @@
             const modal = document.getElementById('product-modal');
             const productForm = document.getElementById('product-form');
             const stockTableBody = document.getElementById('stock-table-body');
-            const paginationContainer = document.getElementById('pagination-container');
+            const paginationButtons = document.getElementById('pagination-buttons');
+            const paginationSummary = document.getElementById('pagination-summary');
             const searchInput = document.getElementById('search-product');
             const filterCategory = document.getElementById('filter-category');
             const filterStockStatus = document.getElementById('filter-stock-status');
             const filterExpiryStatus = document.getElementById('filter-expiry-status');
             const tableHeaders = document.querySelectorAll('#estoque-page .product-table th[data-sort]');
+            const loadingIndicator = document.getElementById('loading-indicator');
+            const clearFiltersBtn = document.getElementById('clear-filters-btn');
+            const selectAllCheckbox = document.getElementById('select-all-checkbox');
+            const deleteSelectedBtn = document.getElementById('delete-selected-btn');
+
 
             const formFields = {
                 id: document.getElementById('product-id'),
@@ -713,6 +879,8 @@
                 const adjustedDate = new Date(date.valueOf() + date.getTimezoneOffset() * 60 * 1000);
                 return adjustedDate.toLocaleDateString('pt-BR');
             };
+            const showLoading = () => loadingIndicator.style.display = 'flex';
+            const hideLoading = () => loadingIndicator.style.display = 'none';
 
             // --- LÓGICA DO MODAL ---
             const openModal = () => { modal.style.display = 'flex'; setTimeout(() => formFields.name.focus(), 50); };
@@ -748,7 +916,9 @@
 
             // --- CRUD COM SUPABASE ---
             const fetchProducts = async () => {
+                showLoading();
                 const { data, error } = await supabase.from('products').select('*');
+                hideLoading();
                 if (error) {
                     console.error('Erro ao buscar produtos:', error);
                     return [];
@@ -845,6 +1015,22 @@
                 }
             };
 
+            const deleteSelectedProducts = async () => {
+                const selectedIds = Array.from(document.querySelectorAll('.product-checkbox:checked')).map(cb => cb.dataset.id);
+                if (selectedIds.length === 0) {
+                    alert('Nenhum produto selecionado.');
+                    return;
+                }
+                if (confirm(`Tem certeza que deseja excluir ${selectedIds.length} produto(s)?`)) {
+                    const { error } = await supabase.from('products').delete().in('id', selectedIds);
+                    if (error) {
+                        alert(`Erro ao excluir produtos: ${error.message}`);
+                    } else {
+                        await fetchAndRenderAll();
+                    }
+                }
+            };
+
             // --- RENDERIZAÇÃO E LÓGICA DA PÁGINA DE ESTOQUE ---
             const updateSortIcons = () => {
                 tableHeaders.forEach(th => {
@@ -919,16 +1105,32 @@
                 const paginatedItems = processedProducts.slice(startIndex, endIndex);
 
                 if (paginatedItems.length === 0) {
-                    stockTableBody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding: 20px;">Nenhum produto encontrado.</td></tr>`;
+                    stockTableBody.innerHTML = `<tr><td colspan="12" style="text-align:center; padding: 20px;">Nenhum produto encontrado.</td></tr>`;
                 } else {
                     paginatedItems.forEach(product => {
                         const tr = document.createElement('tr');
-                        if (product.expiryDate) {
-                            const today = new Date(); today.setHours(0, 0, 0, 0);
-                            const expiry = new Date(product.expiryDate);
-                            const diffDays = Math.ceil((expiry - today) / (1000 * 60 * 60 * 24));
-                            if (diffDays < 0) tr.classList.add('expired');
-                            else if (diffDays <= NEAR_EXPIRY_DAYS) tr.classList.add('near-expiry');
+                        const today = new Date(); today.setHours(0, 0, 0, 0);
+                        const diffDays = product.expiryDate ? Math.ceil((new Date(product.expiryDate) - today) / (1000 * 60 * 60 * 24)) : null;
+
+                        const isExpired = diffDays !== null && diffDays < 0;
+                        const isNearExpiry = diffDays !== null && diffDays >= 0 && diffDays <= NEAR_EXPIRY_DAYS;
+                        const isLowStock = product.quantity > 0 && product.quantity <= LOW_STOCK_THRESHOLD;
+
+                        if (isExpired) tr.classList.add('expired');
+                        else if (isNearExpiry) tr.classList.add('near-expiry');
+                        else if (isLowStock) tr.classList.add('low-stock');
+
+                        let statusHtml = '';
+                        if (isExpired) {
+                            statusHtml += `<span class="status-badge status-expired">Vencido</span>`;
+                        } else if (isNearExpiry) {
+                            statusHtml += `<span class="status-badge status-expiry">Vence em ${diffDays} dias</span>`;
+                        }
+                        if (isLowStock) {
+                            statusHtml += `<span class="status-badge status-low">Baixo Estoque</span>`;
+                        }
+                        if (statusHtml.trim() === '') {
+                            statusHtml = `<span style="color: var(--gray); font-size: 14px;">OK</span>`;
                         }
 
                         let stockClass = '';
@@ -963,8 +1165,17 @@
                             }
                         }
 
+                        let expiryClass = '';
+                        if (product.expiryDate) {
+                            if (isExpired) expiryClass = 'expiry-expired';
+                            else if (isNearExpiry) expiryClass = 'expiry-near';
+                            else expiryClass = 'expiry-ok';
+                        }
+
                         tr.innerHTML = `
+                            <td><input type="checkbox" class="product-checkbox" data-id="${product.id}"></td>
                             <td>${product.name}</td>
+                            <td>${statusHtml}</td>
                             <td>${product.supplier || '---'}</td>
                             <td>${product.category}</td>
                             <td>${stockDisplay}</td>
@@ -972,7 +1183,7 @@
                             <td>${formatCurrency(product.price)}</td>
                             <td>${formatCurrency(product.cost * product.quantity)}</td>
                             <td class="${profitClass}">${profitMarginDisplay}</td>
-                            <td>${formatDate(product.expiryDate)}</td>
+                            <td class="${expiryClass}">${formatDate(product.expiryDate)}</td>
                             <td class="action-buttons">
                                 <button class="edit-btn" data-id="${product.id}"><i class="fas fa-pencil-alt"></i></button>
                                 <button class="delete-btn" data-id="${product.id}"><i class="fas fa-trash-alt"></i></button>
@@ -981,29 +1192,37 @@
                     });
                 }
                 renderPagination(processedProducts.length);
+                hideLoading();
             };
 
             const renderPagination = (totalItems) => {
                 const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
-                paginationContainer.innerHTML = '';
+                paginationButtons.innerHTML = '';
+
+                const startItem = Math.min((currentPage - 1) * ITEMS_PER_PAGE + 1, totalItems);
+                const endItem = Math.min(currentPage * ITEMS_PER_PAGE, totalItems);
+                paginationSummary.textContent = totalItems > 0 ? `Mostrando ${startItem}-${endItem} de ${totalItems} produtos` : 'Nenhum produto encontrado';
+
                 if (totalPages <= 1) return;
+
                 const prevButton = document.createElement('button');
                 prevButton.innerHTML = '&laquo;';
                 prevButton.disabled = currentPage === 1;
                 prevButton.addEventListener('click', () => { currentPage--; renderStockPage(); });
-                paginationContainer.appendChild(prevButton);
+                paginationButtons.appendChild(prevButton);
+
                 for (let i = 1; i <= totalPages; i++) {
                     const pageButton = document.createElement('button');
                     pageButton.textContent = i;
                     if (i === currentPage) pageButton.classList.add('active');
                     pageButton.addEventListener('click', () => { currentPage = i; renderStockPage(); });
-                    paginationContainer.appendChild(pageButton);
+                    paginationButtons.appendChild(pageButton);
                 }
                 const nextButton = document.createElement('button');
                 nextButton.innerHTML = '&raquo;';
                 nextButton.disabled = currentPage === totalPages;
                 nextButton.addEventListener('click', () => { currentPage++; renderStockPage(); });
-                paginationContainer.appendChild(nextButton);
+                paginationButtons.appendChild(nextButton);
             };
 
             const populateCategoryFilter = () => {
@@ -1012,10 +1231,12 @@
                     filterCategory.remove(1);
                 }
                 categories.forEach(cat => {
-                    const option = document.createElement('option');
-                    option.value = cat;
-                    option.textContent = cat;
-                    filterCategory.appendChild(option);
+                    if (cat) {
+                        const option = document.createElement('option');
+                        option.value = cat;
+                        option.textContent = cat;
+                        filterCategory.appendChild(option);
+                    }
                 });
             };
 
@@ -1079,15 +1300,44 @@
                 formFields.packageQuantity.addEventListener('input', calculateUnitPrice);
                 formFields.category.addEventListener('change', () => {
                     const text = formFields.category.options[formFields.category.selectedIndex].text;
-                    if (text.includes('Ração (Grande Porte)') || text.includes('Suplementos')) {
-                        formFields.unit.value = 'SC';
-                    } else if (text.includes('Ração (Pet)')) {
-                        formFields.unit.value = 'KG';
-                    } else if (text.includes('Medicamentos') || text.includes('Acessórios')) {
-                        formFields.unit.value = 'UN';
-                    }
+                    const categoryMap = {
+                        'Ração (Grande Porte)': 'SC',
+                        'Suplementos (Grande Porte)': 'SC',
+                        'Ração (Pet)': 'SC',
+                        'Medicamentos (Grande Porte)': 'UN',
+                        'Medicamentos (Pet)': 'UN',
+                        'Acessórios (Pet)': 'UN',
+                        'Higiene e Beleza': 'L'
+                    };
+                    formFields.unit.value = categoryMap[text] || 'UN';
                     formFields.unit.dispatchEvent(new Event('change'));
                 });
+
+                clearFiltersBtn.addEventListener('click', () => {
+                    searchInput.value = '';
+                    filterCategory.value = 'all';
+                    filterStockStatus.value = 'all';
+                    filterExpiryStatus.value = 'all';
+                    currentPage = 1;
+                    renderStockPage();
+                });
+
+                selectAllCheckbox.addEventListener('click', (e) => {
+                    document.querySelectorAll('.product-checkbox').forEach(cb => {
+                        cb.checked = e.target.checked;
+                        cb.closest('tr').classList.toggle('selected', e.target.checked);
+                    });
+                    deleteSelectedBtn.style.display = e.target.checked ? 'inline-flex' : 'none';
+                });
+
+                stockTableBody.addEventListener('change', (e) => {
+                    if (e.target.classList.contains('product-checkbox')) {
+                        e.target.closest('tr').classList.toggle('selected', e.target.checked);
+                        const anyChecked = !!document.querySelector('.product-checkbox:checked');
+                        deleteSelectedBtn.style.display = anyChecked ? 'inline-flex' : 'none';
+                    }
+                });
+                deleteSelectedBtn.addEventListener('click', deleteSelectedProducts);
 
                 fetchAndRenderAll();
             };

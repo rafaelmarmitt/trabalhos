@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,9 +16,12 @@
     <style>
         /* Paleta de Cores e Variáveis Globais */
         :root {
-            --primary: #2e7d32; /* Verde principal, remetendo ao agro */
-            --secondary: #689f38; /* Verde secundário, mais claro */
-            --accent: #8d6e63; /* Tom de terra/couro */
+            --primary: #2e7d32;
+            /* Verde principal, remetendo ao agro */
+            --secondary: #689f38;
+            /* Verde secundário, mais claro */
+            --accent: #8d6e63;
+            /* Tom de terra/couro */
             --success: #43a047;
             --warning: #ffb300;
             --danger: #e53935;
@@ -70,7 +74,12 @@
             margin-right: 10px;
         }
 
-        .sidebar .menu a {
+        .sidebar .menu {
+            flex-grow: 1;
+        }
+
+        .sidebar .menu a,
+        .sidebar .logout-link a {
             display: flex;
             align-items: center;
             padding: 12px 15px;
@@ -83,12 +92,14 @@
         }
 
         .sidebar .menu a.active,
-        .sidebar .menu a:hover {
+        .sidebar .menu a:hover,
+        .sidebar .logout-link a:hover {
             background-color: var(--primary);
             color: white;
         }
 
-        .sidebar .menu a i {
+        .sidebar .menu a i,
+        .sidebar .logout-link a i {
             margin-right: 15px;
             width: 20px;
             text-align: center;
@@ -112,14 +123,36 @@
             font-size: 28px;
             font-weight: 600;
         }
-        
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-profile img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+
+        .user-profile span {
+            font-weight: 500;
+        }
+
         /* Controles da Página */
         .page-controls {
             display: flex;
             justify-content: space-between;
             margin-bottom: 20px;
         }
-        
+
         #search-supplier {
             padding: 8px 12px;
             border-radius: 8px;
@@ -144,9 +177,10 @@
             flex-direction: column;
             transition: transform 0.2s, box-shadow 0.2s;
         }
+
         .supplier-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
         }
 
         .supplier-card-header {
@@ -169,7 +203,7 @@
             font-weight: 600;
             color: var(--dark);
         }
-        
+
         .supplier-products-summary {
             font-size: 13px;
             font-style: italic;
@@ -186,9 +220,11 @@
             font-size: 14px;
             color: var(--gray);
         }
+
         .supplier-contact-info li {
             margin-bottom: 5px;
         }
+
         .supplier-contact-info i {
             margin-right: 8px;
             width: 16px;
@@ -224,12 +260,12 @@
             gap: 10px;
             justify-content: center;
         }
-        
+
         .chart-section {
             background-color: var(--light);
             padding: 20px;
             border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
             margin-bottom: 30px;
         }
 
@@ -260,18 +296,25 @@
             flex-direction: column;
             max-height: 80vh;
         }
-        
+
         .modal-body {
             overflow-y: auto;
         }
-        
+
         #supplier-modal .modal-content {
             max-width: 500px;
         }
 
         @keyframes slideIn {
-            from { transform: translateY(-30px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            from {
+                transform: translateY(-30px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
         .modal-header {
@@ -280,7 +323,11 @@
             align-items: center;
             margin-bottom: 25px;
         }
-        .modal-header h2 { margin: 0; }
+
+        .modal-header h2 {
+            margin: 0;
+        }
+
         .close-button {
             color: #aaa;
             font-size: 28px;
@@ -288,32 +335,40 @@
             cursor: pointer;
             transition: color 0.3s;
         }
-        .close-button:hover { color: var(--dark); }
+
+        .close-button:hover {
+            color: var(--dark);
+        }
 
         /* Tabela de Produtos no Modal */
         .modal-product-table {
             width: 100%;
             border-collapse: collapse;
         }
-        .modal-product-table th, .modal-product-table td {
+
+        .modal-product-table th,
+        .modal-product-table td {
             padding: 10px 12px;
             text-align: left;
             border-bottom: 1px solid var(--border-color);
         }
-        
+
         .form-group {
             margin-bottom: 20px;
         }
+
         .form-group label {
             display: block;
             margin-bottom: 8px;
             font-weight: 500;
             color: var(--gray);
         }
+
         .form-group label .required {
             color: var(--danger);
             margin-left: 3px;
         }
+
         .form-group input {
             width: 100%;
             padding: 10px 12px;
@@ -330,46 +385,82 @@
             cursor: pointer;
             font-size: 16px;
             font-weight: 500;
-            transition: background-color 0.3s, transform 0.1s;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
-        .btn:active { transform: scale(0.98); }
-        .btn-primary { background-color: var(--primary); color: white; }
-        .btn-primary:hover { background-color: #1b5e20; }
-        .btn-secondary { background-color: var(--secondary); color: white; flex: 1; }
-        .btn-secondary:hover { background-color: #558b2f; }
-        .btn-info { background-color: var(--info); color: white; flex: 1; }
-        .btn-info:hover { background-color: #1565c0; }
 
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #1b5e20;
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary);
+            color: white;
+            flex: 1;
+        }
+
+        .btn-secondary:hover {
+            background-color: #558b2f;
+        }
+
+        .btn-info {
+            background-color: var(--info);
+            color: white;
+            flex: 1;
+        }
+
+        .btn-info:hover {
+            background-color: #1565c0;
+        }
     </style>
 </head>
 
 <body>
     <aside class="sidebar">
-        <div class="logo"><i class="fas fa-horse-head"></i> AgroVET</div>
+        <div class="logo"><i class="fas fa-clover"></i> AgroTrevo</div>
         <nav class="menu">
             <a href="dashboard_agrovet.html"><i class="fas fa-chart-pie"></i> Dashboard</a>
             <a href="estoque.html"><i class="fas fa-boxes-stacked"></i> Estoque</a>
             <a href="fornecedores.html" class="active"><i class="fas fa-truck-field"></i> Fornecedores</a>
             <a href="vendas.html"><i class="fas fa-cash-register"></i> Vendas</a>
             <a href="relatorios.html"><i class="fas fa-file-alt"></i> Relatórios</a>
-            <a><i class="fas fa-cog"></i> Configurações</a>
+            <a href="configuracoes.html"><i class="fas fa-cog"></i> Configurações</a>
         </nav>
+        <div class="logout-link">
+            <a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Sair</a>
+        </div>
     </aside>
 
     <main class="main-content">
         <header>
             <h1>Fornecedores</h1>
-             <div class="header-actions">
-                 <button id="add-supplier-btn" class="btn btn-primary"><i class="fas fa-plus"></i> Novo Fornecedor</button>
-             </div>
+            <div class="header-actions">
+                <button id="add-supplier-btn" class="btn btn-primary"><i class="fas fa-plus"></i> Novo
+                    Fornecedor</button>
+                <div class="user-profile">
+                    <img src="https://i.pravatar.cc/150?u=agroadmin" alt="User">
+                    <span id="user-display"></span>
+                </div>
+            </div>
         </header>
-        
+
         <section class="chart-section">
             <canvas id="supplierValueChart"></canvas>
         </section>
 
         <div class="page-controls">
-             <input type="text" id="search-supplier" placeholder="🔍 Buscar fornecedor...">
+            <input type="text" id="search-supplier" placeholder="🔍 Buscar fornecedor...">
         </div>
 
         <div class="suppliers-grid" id="suppliers-grid-container">
@@ -401,7 +492,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Modal para Adicionar/Editar Fornecedor -->
     <div id="supplier-modal" class="modal">
         <div class="modal-content">
@@ -438,10 +529,25 @@
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             // --- CONFIGURAÇÃO DO SUPABASE ---
-            const SUPABASE_URL = 'https://jsnrvkmdogvbqjxwjyzc.supabase.co'; 
+            const SUPABASE_URL = 'https://jsnrvkmdogvbqjxwjyzc.supabase.co';
             const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzbnJ2a21kb2d2YnFqeHdqeXpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc2OTcxNTksImV4cCI6MjA3MzI3MzE1OX0.cMEwu00R5bJwWOlY-CKts05gk_1dRQ-NSOTUdnKTWgQ';
-
             const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+            // --- VERIFICAÇÃO DE AUTENTICAÇÃO ---
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                window.location.href = 'index.html';
+                return;
+            }
+            document.getElementById('user-display').textContent = session.user.email;
+
+            // --- LOGOUT ---
+            document.getElementById('logout-btn').addEventListener('click', async (e) => {
+                e.preventDefault();
+                const { error } = await supabase.auth.signOut();
+                if (error) console.error('Erro ao sair:', error);
+                else window.location.href = 'index.html';
+            });
 
             // --- VARIÁVEIS GLOBAIS ---
             let suppliersData = {};
@@ -450,11 +556,11 @@
             // --- SELETORES DO DOM ---
             const suppliersGrid = document.getElementById('suppliers-grid-container');
             const searchInput = document.getElementById('search-supplier');
-            
+
             const productsModal = document.getElementById('supplier-products-modal');
             const productsModalTitle = document.getElementById('supplier-modal-title');
             const productsTbody = document.getElementById('supplier-products-tbody');
-            
+
             const supplierModal = document.getElementById('supplier-modal');
             const supplierForm = document.getElementById('supplier-form');
             const supplierModalTitle = document.getElementById('form-supplier-modal-title');
@@ -491,7 +597,7 @@
                             products: []
                         };
                     }
-                    
+
                     const supplierGroup = acc[supplierName];
                     supplierGroup.productCount++;
                     supplierGroup.stockValue += (product.cost || 0) * (product.quantity || 0);
@@ -499,7 +605,7 @@
 
                     return acc;
                 }, {});
-                
+
                 // Adiciona a descrição dos principais produtos
                 for (const supplierName in processedData) {
                     const supplier = processedData[supplierName];
@@ -509,7 +615,7 @@
                     } else if (supplier.products.length > 0) {
                         supplier.topProductsDescription = `Fornece: ${topProducts.join(', ')}`;
                     } else {
-                         supplier.topProductsDescription = 'Nenhum produto associado.';
+                        supplier.topProductsDescription = 'Nenhum produto associado.';
                     }
                 }
 
@@ -557,10 +663,10 @@
                     suppliersGrid.appendChild(card);
                 }
             };
-            
+
             const renderChart = (data) => {
                 const ctx = document.getElementById('supplierValueChart').getContext('2d');
-                const sortedSuppliers = Object.values(data).sort((a,b) => b.stockValue - a.stockValue).slice(0, 7);
+                const sortedSuppliers = Object.values(data).sort((a, b) => b.stockValue - a.stockValue).slice(0, 7);
 
                 if (supplierValueChart) {
                     supplierValueChart.destroy();
@@ -588,7 +694,7 @@
                     }
                 });
             };
-            
+
             // --- LÓGICA DOS MODAIS ---
             const openProductsModal = (supplierName) => {
                 const supplier = suppliersData[supplierName];
@@ -604,7 +710,7 @@
                 `).join('');
                 productsModal.style.display = 'flex';
             };
-            
+
             const openSupplierModal = (supplierData = {}) => {
                 supplierForm.reset();
                 supplierModalTitle.textContent = supplierData.id ? 'Editar Fornecedor' : 'Novo Fornecedor';
@@ -625,7 +731,7 @@
                     email: document.getElementById('supplier-email').value,
                     phone: document.getElementById('supplier-phone').value,
                 };
-                
+
                 let response;
                 if (id) {
                     response = await supabase.from('suppliers').update(supplierData).eq('id', id);
@@ -657,12 +763,12 @@
             suppliersGrid.addEventListener('click', (e) => {
                 const viewBtn = e.target.closest('.view-products-btn');
                 const editBtn = e.target.closest('.edit-supplier-btn');
-                
+
                 if (viewBtn) {
                     const supplierName = viewBtn.dataset.supplierName;
                     openProductsModal(supplierName);
                 }
-                
+
                 if (editBtn) {
                     const supplierName = editBtn.dataset.supplierName;
                     const supplier = suppliersData[supplierName];
@@ -694,5 +800,5 @@
         });
     </script>
 </body>
-</html>
 
+</html>

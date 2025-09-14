@@ -81,7 +81,12 @@
             margin-right: 10px;
         }
 
-        .sidebar .menu a {
+        .sidebar .menu {
+            flex-grow: 1;
+        }
+
+        .sidebar .menu a,
+        .sidebar .logout-link a {
             display: flex;
             align-items: center;
             padding: 12px 15px;
@@ -94,12 +99,14 @@
         }
 
         .sidebar .menu a.active,
-        .sidebar .menu a:hover {
+        .sidebar .menu a:hover,
+        .sidebar .logout-link a:hover {
             background-color: var(--primary);
             color: white;
         }
 
-        .sidebar .menu a i {
+        .sidebar .menu a i,
+        .sidebar .logout-link a i {
             margin-right: 15px;
             width: 20px;
             text-align: center;
@@ -561,7 +568,7 @@
 
 <body>
     <aside class="sidebar">
-        <div class="logo"><i class="fas fa-horse-head"></i> AgroVET</div>
+        <div class="logo"><i class="fas fa-clover"></i> AgroTrevo</div>
         <nav class="menu">
             <a href="dashboard_agrovet.html" class="active"><i class="fas fa-chart-pie"></i> Dashboard</a>
             <a href="estoque.html"><i class="fas fa-boxes-stacked"></i> Estoque</a>
@@ -570,6 +577,9 @@
             <a href="relatorios.html"><i class="fas fa-file-alt"></i> Relatórios</a>
             <a href="configuracoes.html"><i class="fas fa-cog"></i> Configurações</a>
         </nav>
+        <div class="logout-link">
+            <a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Sair</a>
+        </div>
     </aside>
 
     <main class="main-content" id="dashboard-page">
@@ -580,7 +590,7 @@
                     Produto</button>
                 <div class="user-profile">
                     <img src="https://i.pravatar.cc/150?u=agroadmin" alt="User">
-                    <span>Admin</span>
+                    <span id="user-display"></span>
                 </div>
             </div>
         </header>
@@ -671,14 +681,6 @@
                         <label for="product-category">Categoria <span class="required">*</span></label>
                         <select id="product-category" required>
                             <option value="" disabled selected>Selecione uma categoria</option>
-                            <option value="Ração (Grande Porte)">Ração (Grande Porte)</option>
-                            <option value="Medicamentos (Grande Porte)">Medicamentos (Grande Porte)</option>
-                            <option value="Suplementos (Grande Porte)">Suplementos (Grande Porte)</option>
-                            <option value="Ração (Pet)">Ração (Pet)</option>
-                            <option value="Medicamentos (Pet)">Medicamentos (Pet)</option>
-                            <option value="Acessórios (Pet)">Acessórios (Pet)</option>
-                            <option value="Higiene e Beleza">Higiene e Beleza</option>
-                            <option value="Outros">Outros</option>
                         </select>
                     </div>
                     <div class="form-group"><label for="product-unit">Unidade de Medida <span
@@ -803,6 +805,22 @@
             const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzbnJ2a21kb2d2YnFqeHdqeXpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc2OTcxNTksImV4cCI6MjA3MzI3MzE1OX0.cMEwu00R5bJwWOlY-CKts05gk_1dRQ-NSOTUdnKTWgQ';
             const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+            // --- VERIFICAÇÃO DE AUTENTICAÇÃO ---
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                window.location.href = 'index.html';
+                return;
+            }
+            document.getElementById('user-display').textContent = session.user.email;
+
+            // --- LOGOUT ---
+            document.getElementById('logout-btn').addEventListener('click', async (e) => {
+                e.preventDefault();
+                const { error } = await supabase.auth.signOut();
+                if (error) console.error('Erro ao sair:', error);
+                else window.location.href = 'index.html';
+            });
+
             let products = [];
             let currentCart = [];
             let categoryChartInstance, topProductsChartInstance;
@@ -877,13 +895,21 @@
                 formFields.unitPrice.value = (price > 0 && packageQty > 0) ? formatCurrency(price / packageQty) : '';
             };
 
-            const fetchAndPopulateSuppliersDropdown = async () => {
+            const fetchAndPopulateDropdowns = async () => {
                 const { data: suppliers, error: sError } = await supabase.from('suppliers').select('name').order('name');
                 if (sError) console.error('Erro ao buscar fornecedores:', sError);
                 else {
                     const dropdown = formFields.supplier;
                     dropdown.innerHTML = '<option value="" disabled selected>Selecione um fornecedor</option>';
                     suppliers.forEach(s => dropdown.appendChild(new Option(s.name, s.name)));
+                }
+
+                const { data: categories, error: cError } = await supabase.from('categories').select('name').order('name');
+                if (cError) console.error('Erro ao buscar categorias:', cError);
+                else {
+                    const dropdown = formFields.category;
+                    dropdown.innerHTML = '<option value="" disabled selected>Selecione uma categoria</option>';
+                    categories.forEach(c => dropdown.appendChild(new Option(c.name, c.name)));
                 }
             };
 
@@ -938,7 +964,6 @@
 
             // --- LÓGICA MODAL DE VENDA ---
             const renderSaleSearchResults = (term = '') => {
-                if (!term) { searchResultsContainerSale.innerHTML = ''; return; }
                 const results = products.filter(p => p.name.toLowerCase().includes(term.toLowerCase()) && p.quantity > 0);
                 searchResultsContainerSale.innerHTML = results.map(p => `<div class="product-search-item" data-product-id="${p.id}"><span>${p.name}</span><small>${p.quantity} em estoque</small></div>`).join('');
             };
@@ -1037,12 +1062,12 @@
 
             // --- INICIALIZAÇÃO E EVENT LISTENERS ---
             const init = async () => {
-                await fetchAndPopulateSuppliersDropdown();
+                await fetchAndPopulateDropdowns();
 
                 document.getElementById('add-product-btn-dash').addEventListener('click', () => { productForm.reset(); formFields.id.value = ''; formFields.modalTitle.textContent = 'Novo Produto'; formFields.saveBtn.textContent = 'Salvar'; updateConditionalFields(); openModal(mainModal); });
                 document.getElementById('register-entry-btn').addEventListener('click', () => { renderProductSelectionList(); openModal(selectionModal); });
                 document.getElementById('register-sale-btn').addEventListener('click', () => {
-                    currentCart = []; renderCart(); document.getElementById('customer-name').value = ''; productSearchInputSale.value = ''; searchResultsContainerSale.innerHTML = ''; openModal(saleModal);
+                    currentCart = []; renderCart(); document.getElementById('customer-name').value = ''; productSearchInputSale.value = ''; renderSaleSearchResults(); openModal(saleModal);
                 });
 
                 [mainModal, adjustmentModal, selectionModal, saleModal].forEach(modal => {
@@ -1056,9 +1081,13 @@
                 formFields.packageQuantity.addEventListener('input', calculateUnitPrice);
                 formFields.category.addEventListener('change', () => {
                     const text = formFields.category.options[formFields.category.selectedIndex].text;
-                    if (text.includes('Ração (Grande Porte)') || text.includes('Suplementos')) formFields.unit.value = 'SC';
-                    else if (text.includes('Ração (Pet)')) formFields.unit.value = 'KG';
-                    else if (text.includes('Medicamentos') || text.includes('Acessórios')) formFields.unit.value = 'UN';
+                    if (text.includes('Ração (Grande Porte)') || text.includes('Suplementos')) {
+                        formFields.unit.value = 'SC';
+                    } else if (text.includes('Ração (Pet)')) {
+                        formFields.unit.value = 'SC';
+                    } else if (text.includes('Medicamentos') || text.includes('Acessórios')) {
+                        formFields.unit.value = 'UN';
+                    }
                     formFields.unit.dispatchEvent(new Event('change'));
                 });
 

@@ -71,7 +71,12 @@
             margin-right: 10px;
         }
 
-        .sidebar .menu a {
+        .sidebar .menu {
+            flex-grow: 1;
+        }
+
+        .sidebar .menu a,
+        .sidebar .logout-link a {
             display: flex;
             align-items: center;
             padding: 12px 15px;
@@ -84,12 +89,14 @@
         }
 
         .sidebar .menu a.active,
-        .sidebar .menu a:hover {
+        .sidebar .menu a:hover,
+        .sidebar .logout-link a:hover {
             background-color: var(--primary);
             color: white;
         }
 
-        .sidebar .menu a i {
+        .sidebar .menu a i,
+        .sidebar .logout-link a i {
             margin-right: 15px;
             width: 20px;
             text-align: center;
@@ -111,6 +118,28 @@
         header h1 {
             font-size: 28px;
             font-weight: 600;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-profile img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+
+        .user-profile span {
+            font-weight: 500;
         }
 
         .filters-container {
@@ -258,20 +287,29 @@
 
 <body>
     <aside class="sidebar">
-        <div class="logo"><i class="fas fa-horse-head"></i> AgroVET</div>
+        <div class="logo"><i class="fas fa-clover"></i> AgroTrevo</div>
         <nav class="menu">
             <a href="dashboard_agrovet.html"><i class="fas fa-chart-pie"></i> Dashboard</a>
             <a href="estoque.html"><i class="fas fa-boxes-stacked"></i> Estoque</a>
             <a href="fornecedores.html"><i class="fas fa-truck-field"></i> Fornecedores</a>
             <a href="vendas.html"><i class="fas fa-cash-register"></i> Vendas</a>
             <a href="relatorios.html" class="active"><i class="fas fa-file-alt"></i> Relatórios</a>
-            <a><i class="fas fa-cog"></i> Configurações</a>
+            <a href="configuracoes.html"><i class="fas fa-cog"></i> Configurações</a>
         </nav>
+        <div class="logout-link">
+            <a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Sair</a>
+        </div>
     </aside>
 
     <main class="main-content">
         <header>
             <h1>Relatórios</h1>
+            <div class="header-actions">
+                <div class="user-profile">
+                    <img src="https://i.pravatar.cc/150?u=agroadmin" alt="User">
+                    <span id="user-display"></span>
+                </div>
+            </div>
         </header>
 
         <section class="filters-container">
@@ -346,6 +384,22 @@
             const SUPABASE_URL = 'https://jsnrvkmdogvbqjxwjyzc.supabase.co';
             const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzbnJ2a21kb2d2YnFqeHdqeXpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc2OTcxNTksImV4cCI6MjA3MzI3MzE1OX0.cMEwu00R5bJwWOlY-CKts05gk_1dRQ-NSOTUdnKTWgQ';
             const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+            // --- VERIFICAÇÃO DE AUTENTICAÇÃO ---
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                window.location.href = 'index.html';
+                return;
+            }
+            document.getElementById('user-display').textContent = session.user.email;
+
+            // --- LOGOUT ---
+            document.getElementById('logout-btn').addEventListener('click', async (e) => {
+                e.preventDefault();
+                const { error } = await supabase.auth.signOut();
+                if (error) console.error('Erro ao sair:', error);
+                else window.location.href = 'index.html';
+            });
 
             let products = [];
             let lastFetchedSales = [];
@@ -429,7 +483,7 @@
                         salesByDay[saleDateKey] += sale.total_amount;
                     });
 
-                    lastFetchedSales = sales; // Armazena os dados processados
+                    lastFetchedSales = sales;
 
                     document.getElementById('kpi-total-revenue').textContent = formatCurrency(totalRevenue);
                     document.getElementById('kpi-total-profit').textContent = formatCurrency(totalProfit);
