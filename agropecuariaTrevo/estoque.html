@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,13 +14,17 @@
     <style>
         /* Paleta de Cores e Variáveis Globais */
         :root {
-            --primary: #2e7d32; /* Verde principal, remetendo ao agro */
-            --secondary: #689f38; /* Verde secundário, mais claro */
-            --accent: #8d6e63; /* Tom de terra/couro */
+            --primary: #2e7d32;
+            /* Verde principal, remetendo ao agro */
+            --secondary: #689f38;
+            /* Verde secundário, mais claro */
+            --accent: #8d6e63;
+            /* Tom de terra/couro */
             --success: #4caf50;
             --warning: #ffb300;
             --danger: #e53935;
-            --warning-dark: #f57c00; /* Laranja para alertas */
+            --warning-dark: #f57c00;
+            /* Laranja para alertas */
             --light: #f9fafc;
             --dark: #212b36;
             --gray: #637381;
@@ -111,14 +116,14 @@
             font-size: 28px;
             font-weight: 600;
         }
-        
+
         /* Ações do Cabeçalho (Botões e Usuário) */
         .header-actions {
             display: flex;
             align-items: center;
             gap: 20px;
         }
-        
+
         .user-profile {
             display: flex;
             align-items: center;
@@ -134,15 +139,15 @@
         .user-profile span {
             font-weight: 500;
         }
-        
+
         /* Contêiner da Página de Estoque */
         .stock-page-container {
-             background-color: white;
+            background-color: white;
             padding: 20px;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         }
-        
+
         .stock-controls {
             display: flex;
             flex-wrap: wrap;
@@ -154,19 +159,23 @@
             border-bottom: 1px solid var(--border-color);
         }
 
-        .filter-group, .sort-group {
+        .filter-group,
+        .sort-group {
             display: flex;
             gap: 10px;
             align-items: center;
         }
-        
-        .filter-group label, .sort-group label {
+
+        .filter-group label,
+        .sort-group label {
             font-weight: 500;
             font-size: 14px;
             color: var(--gray);
         }
 
-        .filter-group select, .sort-group select, #search-product {
+        .filter-group select,
+        .sort-group select,
+        #search-product {
             padding: 8px 12px;
             border-radius: 8px;
             border: 1px solid var(--border-color);
@@ -187,7 +196,7 @@
             border-bottom: 1px solid var(--border-color);
             vertical-align: middle;
         }
-        
+
         .product-table td small {
             font-size: 12px;
             color: var(--gray);
@@ -199,29 +208,82 @@
             color: var(--gray);
             cursor: pointer;
             user-select: none;
+            white-space: nowrap;
         }
+
         .product-table th:hover {
             color: var(--dark);
         }
+
         .product-table th .sort-icon {
-            margin-left: 5px;
-            opacity: 0.5;
+            display: inline-block;
+            width: 1em;
+            text-align: center;
+            margin-left: 4px;
+            opacity: 0;
+            transition: opacity 0.2s;
         }
-        
+
+        .product-table th[data-sort].asc .sort-icon,
+        .product-table th[data-sort].desc .sort-icon {
+            opacity: 1;
+        }
+
+        .product-table th[data-sort].asc .sort-icon::after {
+            content: '▲';
+            font-size: 0.8em;
+            color: var(--primary);
+        }
+
+        .product-table th[data-sort].desc .sort-icon::after {
+            content: '▼';
+            font-size: 0.8em;
+            color: var(--primary);
+        }
+
         /* Estilo para linhas da tabela com base no vencimento */
-        .product-table tr.near-expiry { background-color: rgba(255, 179, 0, 0.15); }
-        .product-table tr.expired { background-color: rgba(229, 57, 53, 0.15); }
-        .product-table tr:hover { background-color: #f5f5f5; }
-        
+        .product-table tr.near-expiry {
+            background-color: rgba(255, 179, 0, 0.15);
+        }
+
+        .product-table tr.expired {
+            background-color: rgba(229, 57, 53, 0.15);
+        }
+
+        .product-table tr:hover {
+            background-color: #f5f5f5;
+        }
+
         /* Estilos de cor para Lucro */
-        .profit-low { color: var(--danger); font-weight: 600; }
-        .profit-medium { color: var(--warning-dark); font-weight: 500; }
-        .profit-high { color: var(--success); font-weight: 600; }
+        .profit-low {
+            color: var(--danger);
+            font-weight: 600;
+        }
+
+        .profit-medium {
+            color: var(--warning-dark);
+            font-weight: 500;
+        }
+
+        .profit-high {
+            color: var(--success);
+            font-weight: 600;
+        }
 
         /* Estilos de cor para Estoque */
-        .stock-out { color: var(--danger); font-weight: 600; }
-        .stock-low { color: var(--warning-dark); font-weight: 500; }
-        .stock-in { color: var(--success); }
+        .stock-out {
+            color: var(--danger);
+            font-weight: 600;
+        }
+
+        .stock-low {
+            color: var(--warning-dark);
+            font-weight: 500;
+        }
+
+        .stock-in {
+            color: var(--success);
+        }
 
         /* Botões de Ação na Tabela */
         .action-buttons button {
@@ -233,9 +295,14 @@
             margin: 0 5px;
             transition: color 0.3s;
         }
-        
-        .action-buttons button.edit-btn:hover { color: var(--primary); }
-        .action-buttons button.delete-btn:hover { color: var(--danger); }
+
+        .action-buttons button.edit-btn:hover {
+            color: var(--primary);
+        }
+
+        .action-buttons button.delete-btn:hover {
+            color: var(--danger);
+        }
 
         /* Paginação */
         .pagination {
@@ -245,6 +312,7 @@
             margin-top: 20px;
             gap: 5px;
         }
+
         .pagination button {
             padding: 8px 12px;
             border: 1px solid var(--border-color);
@@ -252,10 +320,12 @@
             border-radius: 6px;
             cursor: pointer;
         }
+
         .pagination button:disabled {
             cursor: not-allowed;
             opacity: 0.5;
         }
+
         .pagination button.active {
             background-color: var(--primary);
             color: white;
@@ -288,8 +358,15 @@
         }
 
         @keyframes slideIn {
-            from { transform: translateY(-30px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            from {
+                transform: translateY(-30px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
         .modal-header {
@@ -299,7 +376,9 @@
             margin-bottom: 25px;
         }
 
-        .modal-header h2 { margin: 0; }
+        .modal-header h2 {
+            margin: 0;
+        }
 
         .close-button {
             color: #aaa;
@@ -308,12 +387,15 @@
             cursor: pointer;
             transition: color 0.3s;
         }
-        .close-button:hover { color: var(--dark); }
+
+        .close-button:hover {
+            color: var(--dark);
+        }
 
         .form-group {
             margin-bottom: 20px;
         }
-        
+
         .form-group label {
             display: block;
             margin-bottom: 8px;
@@ -336,7 +418,7 @@
             flex: 1;
             min-width: 150px;
         }
-        
+
         .form-group.hidden {
             display: none;
         }
@@ -350,7 +432,7 @@
             font-size: 16px;
             transition: border-color 0.3s, box-shadow 0.3s;
         }
-        
+
         .form-group input[readonly] {
             background-color: #f0f0f0;
             cursor: not-allowed;
@@ -363,7 +445,7 @@
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.2);
         }
-        
+
         .modal-footer {
             text-align: right;
             margin-top: 25px;
@@ -381,6 +463,7 @@
             font-weight: 500;
             transition: background-color 0.3s, transform 0.1s;
         }
+
         .btn:active {
             transform: scale(0.98);
         }
@@ -389,6 +472,7 @@
             background-color: var(--primary);
             color: white;
         }
+
         .btn-primary:hover {
             background-color: #1b5e20;
         }
@@ -397,6 +481,7 @@
             background-color: #e0e0e0;
             color: var(--dark);
         }
+
         .btn-secondary:hover {
             background-color: #bdbdbd;
         }
@@ -412,17 +497,18 @@
             <a href="fornecedores.html"><i class="fas fa-truck-field"></i> Fornecedores</a>
             <a href="vendas.html"><i class="fas fa-cash-register"></i> Vendas</a>
             <a href="relatorios.html"><i class="fas fa-file-alt"></i> Relatórios</a>
-            <a><i class="fas fa-cog"></i> Configurações</a>
+            <a href="configuracoes.html"><i class="fas fa-cog"></i> Configurações</a>
         </nav>
     </aside>
 
     <!-- PÁGINA ESTOQUE -->
     <main class="main-content" id="estoque-page">
-         <header>
+        <header>
             <h1>Gestão de Estoque</h1>
             <div class="header-actions">
-                <button id="add-product-btn-stock" class="btn btn-primary"><i class="fas fa-plus"></i> Novo Produto</button>
-                 <div class="user-profile">
+                <button id="add-product-btn-stock" class="btn btn-primary"><i class="fas fa-plus"></i> Novo
+                    Produto</button>
+                <div class="user-profile">
                     <img src="https://i.pravatar.cc/150?u=agroadmin" alt="User">
                     <span>Admin</span>
                 </div>
@@ -442,7 +528,7 @@
                         <option value="low-stock">Baixo Estoque</option>
                         <option value="out-of-stock">Sem Estoque</option>
                     </select>
-                     <select id="filter-expiry-status">
+                    <select id="filter-expiry-status">
                         <option value="all">Vencimento</option>
                         <option value="ok">OK</option>
                         <option value="near">Próximo</option>
@@ -470,7 +556,7 @@
                     <!-- Conteúdo da tabela de estoque gerado por JS -->
                 </tbody>
             </table>
-             <div class="pagination" id="pagination-container">
+            <div class="pagination" id="pagination-container">
                 <!-- Controles de paginação gerados por JS -->
             </div>
         </div>
@@ -488,7 +574,8 @@
 
                 <div class="form-group">
                     <label for="product-name">Nome do Produto <span class="required">*</span></label>
-                    <input type="text" id="product-name" placeholder="Ex: Ração Premium para Cães Adultos 15kg" required>
+                    <input type="text" id="product-name" placeholder="Ex: Ração Premium para Cães Adultos 15kg"
+                        required>
                 </div>
 
                 <div class="form-group">
@@ -503,17 +590,9 @@
                         <label for="product-category">Categoria <span class="required">*</span></label>
                         <select id="product-category" required>
                             <option value="" disabled selected>Selecione uma categoria</option>
-                            <option value="Ração (Grande Porte)">Ração (Grande Porte)</option>
-                            <option value="Medicamentos (Grande Porte)">Medicamentos (Grande Porte)</option>
-                            <option value="Suplementos (Grande Porte)">Suplementos (Grande Porte)</option>
-                            <option value="Ração (Pet)">Ração (Pet)</option>
-                            <option value="Medicamentos (Pet)">Medicamentos (Pet)</option>
-                            <option value="Acessórios (Pet)">Acessórios (Pet)</option>
-                            <option value="Higiene e Beleza">Higiene e Beleza</option>
-                            <option value="Outros">Outros</option>
                         </select>
                     </div>
-                     <div class="form-group">
+                    <div class="form-group">
                         <label for="product-unit">Unidade de Medida <span class="required">*</span></label>
                         <select id="product-unit" required>
                             <option value="UN">Unidade (UN)</option>
@@ -529,26 +608,34 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="product-quantity">Quantidade <span class="required">*</span></label>
-                        <input type="number" id="product-quantity" list="quantity-suggestions" min="0" placeholder="0" required>
+                        <input type="number" id="product-quantity" list="quantity-suggestions" min="0" placeholder="0"
+                            required>
                         <datalist id="quantity-suggestions">
-                            <option value="1"></option><option value="5"></option><option value="10"></option><option value="12"></option><option value="24"></option><option value="50"></option><option value="100"></option>
+                            <option value="1"></option>
+                            <option value="5"></option>
+                            <option value="10"></option>
+                            <option value="12"></option>
+                            <option value="24"></option>
+                            <option value="50"></option>
+                            <option value="100"></option>
                         </datalist>
                     </div>
-                     <div class="form-group hidden" id="package-quantity-group">
+                    <div class="form-group hidden" id="package-quantity-group">
                         <label for="product-package-quantity">Unidades/Pacote</label>
                         <input type="number" id="product-package-quantity" min="1" placeholder="Ex: 12">
                     </div>
-                     <div class="form-group hidden" id="weight-volume-group">
-                        <label for="product-weight-volume">Peso/Volume <span id="weight-volume-unit-label"></span></label>
+                    <div class="form-group hidden" id="weight-volume-group">
+                        <label for="product-weight-volume">Peso/Volume <span
+                                id="weight-volume-unit-label"></span></label>
                         <input type="number" id="product-weight-volume" step="0.01" min="0" placeholder="Ex: 15">
                     </div>
-                     <div class="form-group">
+                    <div class="form-group">
                         <label for="product-expiry">Vencimento</label>
                         <input type="date" id="product-expiry">
                     </div>
                 </div>
-                
-                 <div class="form-row">
+
+                <div class="form-row">
                     <div class="form-group">
                         <label for="product-cost">Preço de Custo (R$) <span class="required">*</span></label>
                         <input type="number" id="product-cost" step="0.01" min="0" placeholder="0.00" required>
@@ -557,12 +644,12 @@
                         <label for="product-price">Preço de Venda (R$) <span class="required">*</span></label>
                         <input type="number" id="product-price" step="0.01" min="0" placeholder="0.00" required>
                     </div>
-                     <div class="form-group hidden" id="unit-price-group">
+                    <div class="form-group hidden" id="unit-price-group">
                         <label for="product-unit-price">Preço por Unidade (R$)</label>
                         <input type="text" id="product-unit-price" readonly placeholder="Cálculo automático">
                     </div>
                 </div>
-                
+
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary close-button">Cancelar</button>
                     <button type="submit" class="btn btn-primary" id="save-product-btn">Salvar</button>
@@ -573,12 +660,11 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
-             // --- CONFIGURAÇÃO DO SUPABASE ---
-            const SUPABASE_URL = 'https://jsnrvkmdogvbqjxwjyzc.supabase.co'; 
+            // --- CONFIGURAÇÃO DO SUPABASE ---
+            const SUPABASE_URL = 'https://jsnrvkmdogvbqjxwjyzc.supabase.co';
             const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzbnJ2a21kb2d2YnFqeHdqeXpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc2OTcxNTksImV4cCI6MjA3MzI3MzE1OX0.cMEwu00R5bJwWOlY-CKts05gk_1dRQ-NSOTUdnKTWgQ';
-
             const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            
+
             // --- VARIÁVEIS GLOBAIS ---
             let products = [];
             let currentPage = 1;
@@ -597,7 +683,7 @@
             const filterStockStatus = document.getElementById('filter-stock-status');
             const filterExpiryStatus = document.getElementById('filter-expiry-status');
             const tableHeaders = document.querySelectorAll('#estoque-page .product-table th[data-sort]');
-            
+
             const formFields = {
                 id: document.getElementById('product-id'),
                 name: document.getElementById('product-name'),
@@ -670,26 +756,24 @@
                 return data;
             };
 
-            const fetchAndPopulateSuppliersDropdown = async () => {
-                const { data: suppliers, error } = await supabase.from('suppliers').select('name').order('name', { ascending: true });
-                if (error) {
-                    console.error('Erro ao buscar fornecedores:', error);
-                    return;
-                }
-                
-                const dropdown = formFields.supplier;
-                while (dropdown.options.length > 1) {
-                    dropdown.remove(1);
+            const fetchAndPopulateDropdowns = async () => {
+                const { data: suppliers, error: sError } = await supabase.from('suppliers').select('name').order('name');
+                if (sError) console.error('Erro ao buscar fornecedores:', sError);
+                else {
+                    const dropdown = formFields.supplier;
+                    dropdown.innerHTML = '<option value="" disabled selected>Selecione um fornecedor</option>';
+                    suppliers.forEach(s => dropdown.appendChild(new Option(s.name, s.name)));
                 }
 
-                suppliers.forEach(s => {
-                    const option = document.createElement('option');
-                    option.value = s.name;
-                    option.textContent = s.name;
-                    dropdown.appendChild(option);
-                });
+                const { data: categories, error: cError } = await supabase.from('categories').select('name').order('name');
+                if (cError) console.error('Erro ao buscar categorias:', cError);
+                else {
+                    const dropdown = formFields.category;
+                    dropdown.innerHTML = '<option value="" disabled selected>Selecione uma categoria</option>';
+                    categories.forEach(c => dropdown.appendChild(new Option(c.name, c.name)));
+                }
             };
-            
+
             const handleFormSubmit = async (e) => {
                 e.preventDefault();
                 formFields.saveBtn.disabled = true;
@@ -760,8 +844,17 @@
                     }
                 }
             };
-            
+
             // --- RENDERIZAÇÃO E LÓGICA DA PÁGINA DE ESTOQUE ---
+            const updateSortIcons = () => {
+                tableHeaders.forEach(th => {
+                    th.classList.remove('asc', 'desc');
+                    if (th.dataset.sort === currentSort.key) {
+                        th.classList.add(currentSort.order);
+                    }
+                });
+            };
+
             const getFilteredAndSortedProducts = () => {
                 const searchTerm = searchInput.value.toLowerCase();
                 const category = filterCategory.value;
@@ -781,17 +874,17 @@
                         if (!p.expiryDate) {
                             expiryMatch = expiryStatus === 'ok';
                         } else {
-                            const today = new Date(); today.setHours(0,0,0,0);
+                            const today = new Date(); today.setHours(0, 0, 0, 0);
                             const expiry = new Date(p.expiryDate);
                             const diffDays = Math.ceil((expiry - today) / (1000 * 60 * 60 * 24));
-                            if(expiryStatus === 'expired') expiryMatch = diffDays < 0;
+                            if (expiryStatus === 'expired') expiryMatch = diffDays < 0;
                             else if (expiryStatus === 'near') expiryMatch = diffDays >= 0 && diffDays <= NEAR_EXPIRY_DAYS;
                             else if (expiryStatus === 'ok') expiryMatch = diffDays > NEAR_EXPIRY_DAYS;
                         }
                     }
                     return nameMatch && categoryMatch && stockMatch && expiryMatch;
                 });
-                
+
                 return filtered.sort((a, b) => {
                     const getProfitMargin = (p) => {
                         if (p.price > 0 && p.cost > 0) {
@@ -818,6 +911,7 @@
             };
 
             const renderStockPage = () => {
+                updateSortIcons();
                 const processedProducts = getFilteredAndSortedProducts();
                 stockTableBody.innerHTML = '';
                 const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -825,18 +919,18 @@
                 const paginatedItems = processedProducts.slice(startIndex, endIndex);
 
                 if (paginatedItems.length === 0) {
-                     stockTableBody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding: 20px;">Nenhum produto encontrado.</td></tr>`;
+                    stockTableBody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding: 20px;">Nenhum produto encontrado.</td></tr>`;
                 } else {
                     paginatedItems.forEach(product => {
                         const tr = document.createElement('tr');
-                         if (product.expiryDate) {
-                            const today = new Date(); today.setHours(0,0,0,0);
+                        if (product.expiryDate) {
+                            const today = new Date(); today.setHours(0, 0, 0, 0);
                             const expiry = new Date(product.expiryDate);
                             const diffDays = Math.ceil((expiry - today) / (1000 * 60 * 60 * 24));
                             if (diffDays < 0) tr.classList.add('expired');
                             else if (diffDays <= NEAR_EXPIRY_DAYS) tr.classList.add('near-expiry');
                         }
-                        
+
                         let stockClass = '';
                         if (product.quantity <= 0) {
                             stockClass = 'stock-out';
@@ -845,7 +939,7 @@
                         } else {
                             stockClass = 'stock-in';
                         }
-                        
+
                         let stockDisplay = `<span class="${stockClass}">${product.quantity} ${product.unit}</span>`;
 
                         if ((product.unit === 'PC' || product.unit === 'CX') && product.packageQuantity) {
@@ -860,7 +954,7 @@
                         if (product.price > 0 && product.cost > 0) {
                             const profitMargin = ((product.price - product.cost) / product.price) * 100;
                             profitMarginDisplay = `${profitMargin.toFixed(2).replace('.', ',')}%`;
-                            if(profitMargin < 20) {
+                            if (profitMargin < 20) {
                                 profitClass = 'profit-low';
                             } else if (profitMargin >= 20 && profitMargin < 50) {
                                 profitClass = 'profit-medium';
@@ -924,7 +1018,7 @@
                     filterCategory.appendChild(option);
                 });
             };
-            
+
             const fetchAndRenderAll = async () => {
                 products = await fetchProducts();
                 populateCategoryFilter();
@@ -933,8 +1027,8 @@
 
             // --- INICIALIZAÇÃO E EVENT LISTENERS ---
             const init = async () => {
-                await fetchAndPopulateSuppliersDropdown();
-                
+                await fetchAndPopulateDropdowns();
+
                 document.getElementById('add-product-btn-stock').addEventListener('click', () => {
                     productForm.reset();
                     formFields.id.value = '';
@@ -943,7 +1037,7 @@
                     updateConditionalFields();
                     openModal();
                 });
-                
+
                 document.querySelectorAll('.close-button').forEach(btn => btn.addEventListener('click', closeModal));
                 modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
                 productForm.addEventListener('submit', handleFormSubmit);
@@ -959,18 +1053,18 @@
                         deleteProduct(deleteBtn.dataset.id);
                     }
                 });
-                
+
                 [searchInput, filterCategory, filterStockStatus, filterExpiryStatus].forEach(el => {
                     el.addEventListener('input', () => {
                         currentPage = 1;
                         renderStockPage();
                     });
                 });
-                
+
                 tableHeaders.forEach(th => {
                     th.addEventListener('click', () => {
                         const key = th.dataset.sort;
-                        if(currentSort.key === key) {
+                        if (currentSort.key === key) {
                             currentSort.order = currentSort.order === 'asc' ? 'desc' : 'asc';
                         } else {
                             currentSort.key = key;
@@ -979,15 +1073,19 @@
                         renderStockPage();
                     });
                 });
-                
+
                 formFields.unit.addEventListener('change', updateConditionalFields);
                 formFields.price.addEventListener('input', calculateUnitPrice);
                 formFields.packageQuantity.addEventListener('input', calculateUnitPrice);
                 formFields.category.addEventListener('change', () => {
                     const text = formFields.category.options[formFields.category.selectedIndex].text;
-                    if (text.includes('Ração (Grande Porte)') || text.includes('Suplementos')) formFields.unit.value = 'SC';
-                    else if (text.includes('Ração (Pet)')) formFields.unit.value = 'KG';
-                    else if (text.includes('Medicamentos') || text.includes('Acessórios')) formFields.unit.value = 'UN';
+                    if (text.includes('Ração (Grande Porte)') || text.includes('Suplementos')) {
+                        formFields.unit.value = 'SC';
+                    } else if (text.includes('Ração (Pet)')) {
+                        formFields.unit.value = 'KG';
+                    } else if (text.includes('Medicamentos') || text.includes('Acessórios')) {
+                        formFields.unit.value = 'UN';
+                    }
                     formFields.unit.dispatchEvent(new Event('change'));
                 });
 
@@ -998,6 +1096,5 @@
         });
     </script>
 </body>
-</html>
 
-    
+</html>

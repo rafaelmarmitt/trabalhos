@@ -337,8 +337,6 @@
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
             min-height: 400px;
-            margin-top: 7vh;
-            margin-bottom: 7vh;
         }
 
         /* Estilos do Modal */
@@ -570,7 +568,7 @@
             <a href="fornecedores.html"><i class="fas fa-truck-field"></i> Fornecedores</a>
             <a href="vendas.html"><i class="fas fa-cash-register"></i> Vendas</a>
             <a href="relatorios.html"><i class="fas fa-file-alt"></i> Relatórios</a>
-            <a><i class="fas fa-cog"></i> Configurações</a>
+            <a href="configuracoes.html"><i class="fas fa-cog"></i> Configurações</a>
         </nav>
     </aside>
 
@@ -669,9 +667,10 @@
                         <option value="" disabled selected>Selecione um fornecedor</option>
                     </select></div>
                 <div class="form-row">
-                    <div class="form-group"><label for="product-category">Categoria <span
-                                class="required">*</span></label><select id="product-category" required>
-                            <option value="" disabled selected>Selecione</option>
+                    <div class="form-group">
+                        <label for="product-category">Categoria <span class="required">*</span></label>
+                        <select id="product-category" required>
+                            <option value="" disabled selected>Selecione uma categoria</option>
                             <option value="Ração (Grande Porte)">Ração (Grande Porte)</option>
                             <option value="Medicamentos (Grande Porte)">Medicamentos (Grande Porte)</option>
                             <option value="Suplementos (Grande Porte)">Suplementos (Grande Porte)</option>
@@ -680,7 +679,8 @@
                             <option value="Acessórios (Pet)">Acessórios (Pet)</option>
                             <option value="Higiene e Beleza">Higiene e Beleza</option>
                             <option value="Outros">Outros</option>
-                        </select></div>
+                        </select>
+                    </div>
                     <div class="form-group"><label for="product-unit">Unidade de Medida <span
                                 class="required">*</span></label><select id="product-unit" required>
                             <option value="UN">Unidade (UN)</option>
@@ -806,8 +806,7 @@
             let products = [];
             let currentCart = [];
             let categoryChartInstance, topProductsChartInstance;
-            const LOW_STOCK_THRESHOLD = 10;
-            const NEAR_EXPIRY_DAYS = 60;
+            let settings = { low_stock_threshold: 10, near_expiry_days: 60 };
 
             // --- SELETORES GERAIS ---
             const mainModal = document.getElementById('product-modal');
@@ -835,6 +834,10 @@
             const finalizeSaleBtn = document.getElementById('finalize-sale-btn');
 
             // --- FUNÇÕES DE DADOS ---
+            const fetchSystemSettings = async () => {
+                const { data, error } = await supabase.from('system_settings').select('*').eq('id', 1).single();
+                if (!error && data) settings = data;
+            };
             const fetchProducts = async () => {
                 const { data, error } = await supabase.from('products').select('*');
                 if (error) console.error('Erro ao buscar produtos:', error);
@@ -846,6 +849,44 @@
             const closeModal = (modalElement) => modalElement.style.display = 'none';
 
             // --- LÓGICA MODAL DE PRODUTO ---
+            const updateConditionalFields = () => {
+                const selectedUnit = formFields.unit.value;
+                const isPackageOrBox = ['PC', 'CX'].includes(selectedUnit);
+                const needsWeightVolume = ['KG', 'L', 'SC'].includes(selectedUnit);
+                formFields.packageQuantityGroup.classList.toggle('hidden', !isPackageOrBox);
+                formFields.unitPriceGroup.classList.toggle('hidden', !isPackageOrBox);
+                formFields.weightVolumeGroup.classList.toggle('hidden', !needsWeightVolume);
+                if (needsWeightVolume) {
+                    const label = formFields.weightVolumeGroup.querySelector('label');
+                    const unitSpan = document.getElementById('weight-volume-unit-label');
+                    if (selectedUnit === 'SC') {
+                        label.childNodes[0].nodeValue = 'Peso por Saco ';
+                        unitSpan.textContent = '(KG)';
+                    } else {
+                        label.childNodes[0].nodeValue = 'Peso/Volume ';
+                        unitSpan.textContent = `(${selectedUnit})`;
+                    }
+                }
+                if (!isPackageOrBox) { formFields.packageQuantity.value = ''; formFields.unitPrice.value = ''; }
+                if (!needsWeightVolume) { formFields.weightVolume.value = ''; }
+            };
+
+            const calculateUnitPrice = () => {
+                const price = parseFloat(formFields.price.value);
+                const packageQty = parseInt(formFields.packageQuantity.value);
+                formFields.unitPrice.value = (price > 0 && packageQty > 0) ? formatCurrency(price / packageQty) : '';
+            };
+
+            const fetchAndPopulateSuppliersDropdown = async () => {
+                const { data: suppliers, error: sError } = await supabase.from('suppliers').select('name').order('name');
+                if (sError) console.error('Erro ao buscar fornecedores:', sError);
+                else {
+                    const dropdown = formFields.supplier;
+                    dropdown.innerHTML = '<option value="" disabled selected>Selecione um fornecedor</option>';
+                    suppliers.forEach(s => dropdown.appendChild(new Option(s.name, s.name)));
+                }
+            };
+
             const handleProductFormSubmit = async (e) => {
                 e.preventDefault();
                 formFields.saveBtn.disabled = true;
@@ -896,9 +937,9 @@
             };
 
             // --- LÓGICA MODAL DE VENDA ---
-            const renderSaleSearchResults = () => {
-                const term = productSearchInputSale.value.toLowerCase();
-                const results = products.filter(p => p.name.toLowerCase().includes(term) && p.quantity > 0);
+            const renderSaleSearchResults = (term = '') => {
+                if (!term) { searchResultsContainerSale.innerHTML = ''; return; }
+                const results = products.filter(p => p.name.toLowerCase().includes(term.toLowerCase()) && p.quantity > 0);
                 searchResultsContainerSale.innerHTML = results.map(p => `<div class="product-search-item" data-product-id="${p.id}"><span>${p.name}</span><small>${p.quantity} em estoque</small></div>`).join('');
             };
             const updateCartTotal = () => {
@@ -943,18 +984,19 @@
 
             // --- LÓGICA DO DASHBOARD ---
             const updateDashboard = async () => {
+                await fetchSystemSettings();
                 await fetchProducts();
                 updateSummaryCards();
                 updateCriticalProductsTable();
                 updateCharts();
             };
             const updateSummaryCards = () => {
-                const lowStockCount = products.filter(p => p.quantity > 0 && p.quantity <= LOW_STOCK_THRESHOLD).length;
+                const lowStockCount = products.filter(p => p.quantity > 0 && p.quantity <= settings.low_stock_threshold).length;
                 const today = new Date(); today.setHours(0, 0, 0, 0);
                 const nearExpiryCount = products.filter(p => {
                     if (!p.expiryDate) return false;
                     const diffDays = Math.ceil((new Date(p.expiryDate) - today) / (1000 * 60 * 60 * 24));
-                    return diffDays >= 0 && diffDays <= NEAR_EXPIRY_DAYS;
+                    return diffDays >= 0 && diffDays <= settings.near_expiry_days;
                 }).length;
                 const potentialProfit = products.reduce((acc, p) => acc + (p.price - p.cost) * p.quantity, 0);
                 document.getElementById('summary-total-produtos').textContent = products.length;
@@ -966,21 +1008,21 @@
                 const tbody = document.getElementById('critical-products-tbody');
                 const today = new Date(); today.setHours(0, 0, 0, 0);
                 const criticalProducts = products.filter(p => {
-                    const isLowStock = p.quantity > 0 && p.quantity <= LOW_STOCK_THRESHOLD;
+                    const isLowStock = p.quantity > 0 && p.quantity <= settings.low_stock_threshold;
                     if (!p.expiryDate) return isLowStock;
                     const diffDays = Math.ceil((new Date(p.expiryDate) - today) / (1000 * 60 * 60 * 24));
-                    return isLowStock || (diffDays >= 0 && diffDays <= NEAR_EXPIRY_DAYS) || diffDays < 0;
+                    return isLowStock || (diffDays >= 0 && diffDays <= settings.near_expiry_days) || diffDays < 0;
                 });
                 if (criticalProducts.length === 0) { tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px;">Nenhum alerta no momento.</td></tr>`; return; }
                 tbody.innerHTML = criticalProducts.map(p => {
                     const diffDays = p.expiryDate ? Math.ceil((new Date(p.expiryDate) - today) / (1000 * 60 * 60 * 24)) : null;
                     const isExpired = diffDays < 0;
-                    const isNearExpiry = diffDays >= 0 && diffDays <= NEAR_EXPIRY_DAYS;
+                    const isNearExpiry = diffDays >= 0 && diffDays <= settings.near_expiry_days;
                     let statusHtml = ''; let rowClass = '';
                     if (isExpired) {
                         statusHtml += `<span class="status-badge status-expired">Vencido</span> `; rowClass = 'tr-danger';
                     } else if (isNearExpiry) { statusHtml += `<span class="status-badge status-expiry">Vence em ${diffDays} dias</span> `; rowClass = 'tr-warning'; }
-                    if (p.quantity > 0 && p.quantity <= LOW_STOCK_THRESHOLD) { statusHtml += `<span class="status-badge status-low">Estoque Baixo</span>`; }
+                    if (p.quantity > 0 && p.quantity <= settings.low_stock_threshold) { statusHtml += `<span class="status-badge status-low">Estoque Baixo</span>`; }
                     return `<tr class="${rowClass}"><td>${p.name}</td><td>${statusHtml.trim()}</td><td>${p.quantity} ${p.unit}</td><td>${formatDate(p.expiryDate)}</td><td><button class="btn btn-adjust" data-id="${p.id}">Ajustar</button></td></tr>`;
                 }).join('');
             };
@@ -995,17 +1037,12 @@
 
             // --- INICIALIZAÇÃO E EVENT LISTENERS ---
             const init = async () => {
-                const { data: suppliers, error } = await supabase.from('suppliers').select('name').order('name');
-                if (error) console.error('Erro ao buscar fornecedores:', error);
-                else {
-                    const dropdown = formFields.supplier;
-                    suppliers.forEach(s => dropdown.appendChild(new Option(s.name, s.name)));
-                }
+                await fetchAndPopulateSuppliersDropdown();
 
-                document.getElementById('add-product-btn-dash').addEventListener('click', () => { productForm.reset(); formFields.id.value = ''; formFields.modalTitle.textContent = 'Novo Produto'; formFields.saveBtn.textContent = 'Salvar'; openModal(mainModal); });
+                document.getElementById('add-product-btn-dash').addEventListener('click', () => { productForm.reset(); formFields.id.value = ''; formFields.modalTitle.textContent = 'Novo Produto'; formFields.saveBtn.textContent = 'Salvar'; updateConditionalFields(); openModal(mainModal); });
                 document.getElementById('register-entry-btn').addEventListener('click', () => { renderProductSelectionList(); openModal(selectionModal); });
                 document.getElementById('register-sale-btn').addEventListener('click', () => {
-                    currentCart = []; renderCart(); document.getElementById('customer-name').value = ''; productSearchInputSale.value = ''; renderSaleSearchResults(); openModal(saleModal);
+                    currentCart = []; renderCart(); document.getElementById('customer-name').value = ''; productSearchInputSale.value = ''; searchResultsContainerSale.innerHTML = ''; openModal(saleModal);
                 });
 
                 [mainModal, adjustmentModal, selectionModal, saleModal].forEach(modal => {
@@ -1014,13 +1051,24 @@
                 });
 
                 productForm.addEventListener('submit', handleProductFormSubmit);
+                formFields.unit.addEventListener('change', updateConditionalFields);
+                formFields.price.addEventListener('input', calculateUnitPrice);
+                formFields.packageQuantity.addEventListener('input', calculateUnitPrice);
+                formFields.category.addEventListener('change', () => {
+                    const text = formFields.category.options[formFields.category.selectedIndex].text;
+                    if (text.includes('Ração (Grande Porte)') || text.includes('Suplementos')) formFields.unit.value = 'SC';
+                    else if (text.includes('Ração (Pet)')) formFields.unit.value = 'KG';
+                    else if (text.includes('Medicamentos') || text.includes('Acessórios')) formFields.unit.value = 'UN';
+                    formFields.unit.dispatchEvent(new Event('change'));
+                });
+
                 adjustmentForm.addEventListener('submit', handleAdjustmentFormSubmit);
                 selectionSearch.addEventListener('input', (e) => renderProductSelectionList(e.target.value));
                 selectionList.addEventListener('click', (e) => { const item = e.target.closest('.product-search-item'); if (item) { closeModal(selectionModal); openAdjustmentModal(item.dataset.id); } });
                 document.getElementById('critical-products-tbody').addEventListener('click', (e) => { if (e.target.classList.contains('btn-adjust')) openAdjustmentModal(e.target.dataset.id); });
 
                 // Eventos do Modal de Venda
-                productSearchInputSale.addEventListener('input', renderSaleSearchResults);
+                productSearchInputSale.addEventListener('input', (e) => renderSaleSearchResults(e.target.value));
                 searchResultsContainerSale.addEventListener('click', e => { const item = e.target.closest('.product-search-item'); if (item) addToCart(Number(item.dataset.productId)); });
                 cartItemsContainer.addEventListener('change', e => { if (e.target.type === 'number') { const item = currentCart.find(i => i.id === Number(e.target.closest('.cart-item').dataset.productId)); item.quantity = Number(e.target.value); renderCart(); } });
                 cartItemsContainer.addEventListener('click', e => { if (e.target.classList.contains('remove-item-btn')) { currentCart = currentCart.filter(i => i.id !== Number(e.target.closest('.cart-item').dataset.productId)); renderCart(); } });
