@@ -300,10 +300,11 @@
         }
 
         .product-search-results {
-            max-height: 200px;
+            max-height: 300px;
             overflow-y: auto;
             border: 1px solid var(--border-color);
             border-radius: 6px;
+            margin-bottom: 10vh;
         }
 
         .product-search-item {
@@ -320,7 +321,7 @@
         .cart-items {
             list-style: none;
             padding: 0;
-            max-height: 250px;
+            max-height: 350px;
             overflow-y: auto;
         }
 
@@ -464,12 +465,29 @@
                 <h2>Registrar Nova Venda</h2><span class="close-button">&times;</span>
             </div>
             <div class="sale-modal-body">
-                <!-- Seção de Busca de Produto -->
-                <div class="product-selection-section">
-                    <div class="form-group"><label for="customer-name">Nome do Cliente</label><input type="text"
-                            id="customer-name" placeholder="Consumidor Final"></div>
-                    <div class="form-group"><label for="product-search">Buscar Produto</label><input type="text"
-                            id="product-search"></div>
+                <!-- Seção de Cliente e Busca -->
+                <div class="customer-product-section">
+                    <div class="form-group">
+                        <label for="customer-name">Nome do Cliente</label>
+                        <input type="text" id="customer-name" placeholder="Consumidor Final">
+                    </div>
+                    <div class="form-group">
+                        <label for="customer-phone">Telefone</label>
+                        <input type="text" id="customer-phone" placeholder="(00) 00000-0000">
+                    </div>
+                    <div class="form-group">
+                        <label for="customer-document">CPF/CNPJ</label>
+                        <input type="text" id="customer-document" placeholder="000.000.000-00">
+                    </div>
+                    <div class="form-group">
+                        <label for="customer-address">Endereço</label>
+                        <input type="text" id="customer-address" placeholder="Rua, Número, Bairro">
+                    </div>
+                    <hr style="margin: 20px 0;">
+                    <div class="form-group">
+                        <label for="product-search">Buscar Produto</label>
+                        <input type="text" id="product-search">
+                    </div>
                     <div id="product-search-results" class="product-search-results"></div>
                 </div>
                 <!-- Seção do Carrinho -->
@@ -575,7 +593,6 @@
 
             const renderSearchResults = () => {
                 const term = productSearchInput.value.toLowerCase();
-                if (!term) { searchResultsContainer.innerHTML = ''; return; }
                 const results = products.filter(p => p.name.toLowerCase().includes(term) && p.quantity > 0);
                 searchResultsContainer.innerHTML = results.map(p => `
                     <div class="product-search-item" data-product-id="${p.id}">
@@ -618,9 +635,15 @@
                 finalizeSaleBtn.textContent = 'Processando...';
 
                 const total_amount = currentCart.reduce((sum, item) => sum + (item.quantity * item.price), 0);
-                const customer_name = document.getElementById('customer-name').value || 'Consumidor Final';
+                const customerData = {
+                    customer_name: document.getElementById('customer-name').value || 'Consumidor Final',
+                    customer_phone: document.getElementById('customer-phone').value,
+                    customer_document: document.getElementById('customer-document').value,
+                    customer_address: document.getElementById('customer-address').value,
+                    total_amount
+                };
 
-                const { data: saleData, error: saleError } = await supabase.from('sales').insert({ customer_name, total_amount }).select().single();
+                const { data: saleData, error: saleError } = await supabase.from('sales').insert(customerData).select().single();
                 if (saleError) return alert('Erro ao registrar venda: ' + saleError.message);
 
                 const sale_id = saleData.id;
@@ -647,7 +670,10 @@
                 const body = document.getElementById('sale-details-body');
                 document.getElementById('details-modal-title').textContent = `Detalhes da Venda #${sale.id}`;
                 body.innerHTML = `
-                    <p><strong>Cliente:</strong> ${sale.customer_name}</p>
+                    <p><strong>Cliente:</strong> ${sale.customer_name || 'N/A'}</p>
+                    <p><strong>Telefone:</strong> ${sale.customer_phone || 'N/A'}</p>
+                    <p><strong>Documento:</strong> ${sale.customer_document || 'N/A'}</p>
+                    <p><strong>Endereço:</strong> ${sale.customer_address || 'N/A'}</p>
                     <p><strong>Data:</strong> ${formatDate(sale.created_at)}</p>
                     <p><strong>Total:</strong> ${formatCurrency(sale.total_amount)}</p>
                     <hr style="margin: 15px 0;">
@@ -674,6 +700,9 @@
                 currentCart = [];
                 renderCart();
                 document.getElementById('customer-name').value = '';
+                document.getElementById('customer-phone').value = '';
+                document.getElementById('customer-document').value = '';
+                document.getElementById('customer-address').value = '';
                 productSearchInput.value = '';
                 renderSearchResults();
                 saleModal.style.display = 'flex';
@@ -711,6 +740,14 @@
 
             salesHistoryBody.addEventListener('click', e => {
                 if (e.target.dataset.saleId) openDetailsModal(Number(e.target.dataset.saleId));
+            });
+
+            const phoneInput = document.getElementById('customer-phone');
+            phoneInput.addEventListener('input', (e) => {
+                let value = e.target.value.replace(/\D/g, "");
+                value = value.replace(/^(\d{2})(\d)/g, "($1) $2");
+                value = value.replace(/(\d)(\d{4})$/, "$1-$2");
+                e.target.value = value;
             });
 
             const init = async () => {
