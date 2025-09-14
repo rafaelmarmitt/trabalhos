@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>AgroTrevo | Dashboard</title>
+    <title>AgroTrevo | Dashboard</title>
     <link rel="shortcut icon" href="img/trevo.png" type="image/x-icon">
     <!-- Google Fonts: Poppins para uma aparência moderna -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -163,6 +163,11 @@
             margin-bottom: 30px;
         }
 
+        .card-link {
+            text-decoration: none;
+            color: inherit;
+        }
+
         .card {
             background-color: white;
             padding: 25px;
@@ -171,6 +176,12 @@
             display: flex;
             align-items: center;
             gap: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card-link:hover .card {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
         }
 
         .card .icon {
@@ -577,6 +588,7 @@
             <a href="estoque.html"><i class="fas fa-boxes-stacked"></i> Estoque</a>
             <a href="fornecedores.html"><i class="fas fa-truck-field"></i> Fornecedores</a>
             <a href="vendas.html"><i class="fas fa-cash-register"></i> Vendas</a>
+             <a href="clientes.html"><i class="fas fa-users"></i> Clientes</a>
             <a href="relatorios.html"><i class="fas fa-file-alt"></i> Relatórios</a>
             <a href="configuracoes.html"><i class="fas fa-cog"></i> Configurações</a>
         </nav>
@@ -599,34 +611,42 @@
         </header>
 
         <section class="summary-cards">
-            <div class="card total-produtos">
-                <div class="icon"><i class="fas fa-box"></i></div>
-                <div class="card-info">
-                    <h3>Total de Produtos</h3>
-                    <div class="card-value" id="summary-total-produtos">0</div>
+            <a href="estoque.html" class="card-link">
+                <div class="card total-produtos">
+                    <div class="icon"><i class="fas fa-box"></i></div>
+                    <div class="card-info">
+                        <h3>Total de Produtos</h3>
+                        <div class="card-value" id="summary-total-produtos">0</div>
+                    </div>
                 </div>
-            </div>
-            <div class="card baixo-estoque">
-                <div class="icon"><i class="fas fa-triangle-exclamation"></i></div>
-                <div class="card-info">
-                    <h3>Baixo Estoque</h3>
-                    <div class="card-value" id="summary-baixo-estoque">0</div>
+            </a>
+            <a href="estoque.html?filterStock=low-stock" class="card-link">
+                <div class="card baixo-estoque">
+                    <div class="icon"><i class="fas fa-triangle-exclamation"></i></div>
+                    <div class="card-info">
+                        <h3>Baixo Estoque</h3>
+                        <div class="card-value" id="summary-baixo-estoque">0</div>
+                    </div>
                 </div>
-            </div>
-            <div class="card perto-vencimento">
-                <div class="icon"><i class="fas fa-calendar-times"></i></div>
-                <div class="card-info">
-                    <h3>Perto do Vencimento</h3>
-                    <div class="card-value" id="summary-perto-vencimento">0</div>
+            </a>
+            <a href="estoque.html?filterExpiry=near" class="card-link">
+                <div class="card perto-vencimento">
+                    <div class="icon"><i class="fas fa-calendar-times"></i></div>
+                    <div class="card-info">
+                        <h3>Perto do Vencimento</h3>
+                        <div class="card-value" id="summary-perto-vencimento">0</div>
+                    </div>
                 </div>
-            </div>
-            <div class="card lucro-potencial">
-                <div class="icon"><i class="fas fa-dollar-sign"></i></div>
-                <div class="card-info">
-                    <h3>Lucro Potencial</h3>
-                    <div class="card-value small" id="summary-lucro-potencial">R$ 0,00</div>
+            </a>
+            <a href="estoque.html?sortBy=profitMargin&order=desc" class="card-link">
+                <div class="card lucro-potencial">
+                    <div class="icon"><i class="fas fa-dollar-sign"></i></div>
+                    <div class="card-info">
+                        <h3>Lucro Potencial</h3>
+                        <div class="card-value small" id="summary-lucro-potencial">R$ 0,00</div>
+                    </div>
                 </div>
-            </div>
+            </a>
         </section>
 
         <section class="main-grid">
@@ -637,8 +657,8 @@
                         Registrar Venda</button>
                     <button class="action-button entry" id="register-entry-btn"><i class="fas fa-arrow-up"></i>
                         Registrar Entrada</button>
-                    <button class="action-button report" id="generate-report-btn"><i class="fas fa-file-invoice"></i>
-                        Gerar Relatório</button>
+                    <a href="relatorios.html" class="action-button report" style="text-decoration: none;"><i
+                            class="fas fa-file-invoice"></i> Gerar Relatório</a>
                 </div>
             </div>
             <div class="section-container alerts-table">
@@ -757,7 +777,7 @@
                 <div class="form-group"><label>Tipo de Ajuste <span class="required">*</span></label>
                     <div style="display: flex; gap: 20px;"><label><input type="radio" name="adjustment-type"
                                 value="entry" checked> Entrada</label><label><input type="radio" name="adjustment-type"
-                                value="sale"> **NÃO USAR**</label></div>
+                                value="sale"> Saída (Venda)</label></div>
                 </div>
                 <div class="modal-footer"><button type="button"
                         class="btn btn-secondary close-button">Cancelar</button><button type="submit"

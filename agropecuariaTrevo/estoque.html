@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgroTrevo | Gestão de Estoque</title>
+   <title>AgroTrevo | Estoque</title>
     <link rel="shortcut icon" href="img/trevo.png" type="image/x-icon">
     <!-- Google Fonts: Poppins para uma aparência moderna -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -607,6 +607,7 @@
             <a href="estoque.html" class="active"><i class="fas fa-boxes-stacked"></i> Estoque</a>
             <a href="fornecedores.html"><i class="fas fa-truck-field"></i> Fornecedores</a>
             <a href="vendas.html"><i class="fas fa-cash-register"></i> Vendas</a>
+            <a href="clientes.html"><i class="fas fa-users"></i> Clientes</a>
             <a href="relatorios.html"><i class="fas fa-file-alt"></i> Relatórios</a>
             <a href="configuracoes.html"><i class="fas fa-cog"></i> Configurações</a>
         </nav>
@@ -1244,9 +1245,29 @@
                 renderStockPage();
             };
 
+            const applyUrlParams = () => {
+                const urlParams = new URLSearchParams(window.location.search);
+                const filterStock = urlParams.get('filterStock');
+                const filterExpiry = urlParams.get('filterExpiry');
+                const sortBy = urlParams.get('sortBy');
+                const order = urlParams.get('order');
+
+                if (filterStock) {
+                    filterStockStatus.value = filterStock;
+                }
+                if (filterExpiry) {
+                    filterExpiryStatus.value = filterExpiry;
+                }
+                if (sortBy) {
+                    currentSort.key = sortBy;
+                    currentSort.order = order || 'asc';
+                }
+            };
+
             // --- INICIALIZAÇÃO E EVENT LISTENERS ---
             const init = async () => {
                 await fetchAndPopulateDropdowns();
+                applyUrlParams();
 
                 document.getElementById('add-product-btn-stock').addEventListener('click', () => {
                     productForm.reset();

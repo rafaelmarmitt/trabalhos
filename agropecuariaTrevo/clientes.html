@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgroTrevo | Clientes</title>
+    <link rel="shortcut icon" href="https://img.icons8.com/office/16/clover.png" type="image/x-icon">
+    <!-- Google Fonts: Poppins para uma aparência moderna -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome para ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --primary: #2e7d32;
+            --secondary: #689f38;
+            --accent: #8d6e63;
+            --success: #43a047;
+            --warning: #ffb300;
+            --danger: #e53935;
+            --info: #1e88e5;
+            --light: #ffffff;
+            --dark: #212b36;
+            --gray: #637381;
+            --bg-light: #f4f6f8;
+            --border-color: #e0e0e0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            display: flex;
+            color: var(--dark);
+        }
+
+        .sidebar {
+            width: 260px;
+            background-color: var(--light);
+            padding: 20px;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+        }
+
+        .sidebar .logo {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .sidebar .logo i {
+            margin-right: 10px;
+        }
+
+        .sidebar .menu {
+            flex-grow: 1;
+        }
+
+        .sidebar .menu a,
+        .sidebar .logout-link a {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            color: var(--gray);
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            transition: background-color 0.3s, color 0.3s;
+            cursor: pointer;
+        }
+
+        .sidebar .menu a.active,
+        .sidebar .menu a:hover,
+        .sidebar .logout-link a:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .sidebar .menu a i,
+        .sidebar .logout-link a i {
+            margin-right: 15px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .main-content {
+            margin-left: 260px;
+            padding: 30px;
+            width: calc(100% - 260px);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-profile img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+
+        .user-profile span {
+            font-weight: 500;
+        }
+
+        .page-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        #search-customer {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            font-size: 14px;
+            min-width: 300px;
+        }
+
+        .customers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .customer-card {
+            background-color: var(--light);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .customer-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .customer-card-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .customer-card-header .icon {
+            font-size: 20px;
+            padding: 12px;
+            border-radius: 50%;
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        .customer-card-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .customer-contact-info {
+            list-style: none;
+            padding-left: 50px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: var(--gray);
+        }
+
+        .customer-contact-info li {
+            margin-bottom: 5px;
+        }
+
+        .customer-contact-info i {
+            margin-right: 8px;
+            width: 16px;
+            text-align: center;
+        }
+
+        .customer-card-kpis {
+            display: flex;
+            justify-content: space-around;
+            gap: 15px;
+            margin-bottom: 20px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 20px;
+        }
+
+        .kpi {
+            text-align: center;
+        }
+
+        .kpi .value {
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .kpi .label {
+            font-size: 14px;
+            color: var(--gray);
+        }
+
+        .customer-card-footer {
+            margin-top: auto;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.6);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            padding: 30px;
+            width: 90%;
+            max-width: 800px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.3s ease-out;
+            display: flex;
+            flex-direction: column;
+            max-height: 80vh;
+        }
+
+        .modal-body {
+            overflow-y: auto;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-30px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+        }
+
+        .close-button {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .history-table th,
+        .history-table td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary);
+            color: white;
+            flex: 1;
+        }
+
+        .btn-info {
+            background-color: var(--info);
+            color: white;
+            flex: 1;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <aside class="sidebar">
+        <div class="logo"><i class="fas fa-clover"></i> AgroTrevo</div>
+        <nav class="menu">
+            <a href="dashboard_agrovet.html"><i class="fas fa-chart-pie"></i> Dashboard</a>
+            <a href="estoque.html"><i class="fas fa-boxes-stacked"></i> Estoque</a>
+            <a href="fornecedores.html"><i class="fas fa-truck-field"></i> Fornecedores</a>
+            <a href="vendas.html"><i class="fas fa-cash-register"></i> Vendas</a>
+            <a href="clientes.html" class="active"><i class="fas fa-users"></i> Clientes</a>
+            <a href="relatorios.html"><i class="fas fa-file-alt"></i> Relatórios</a>
+            <a href="configuracoes.html"><i class="fas fa-cog"></i> Configurações</a>
+        </nav>
+        <div class="logout-link">
+            <a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Sair</a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header>
+            <h1>Gestão de Clientes</h1>
+            <div class="header-actions">
+                <button id="add-customer-btn" class="btn btn-primary"><i class="fas fa-plus"></i> Novo Cliente</button>
+                <div class="user-profile">
+                    <img src="https://i.pravatar.cc/150?u=agroadmin" alt="User">
+                    <span id="user-display"></span>
+                </div>
+            </div>
+        </header>
+
+        <div class="page-controls">
+            <input type="text" id="search-customer" placeholder="🔍 Buscar cliente por nome, telefone ou documento...">
+        </div>
+
+        <div class="customers-grid" id="customers-grid-container">
+            <!-- Cards dos clientes serão inseridos aqui -->
+        </div>
+    </main>
+
+    <!-- Modal para Histórico de Compras -->
+    <div id="purchase-history-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="history-modal-title">Histórico de Compras</h2>
+                <span class="close-button">&times;</span>
+            </div>
+            <div class="modal-body">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Total</th>
+                            <th>Itens</th>
+                        </tr>
+                    </thead>
+                    <tbody id="purchase-history-tbody">
+                        <!-- Histórico de compras aqui -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Adicionar/Editar Cliente -->
+    <div id="customer-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2 id="customer-modal-title">Novo Cliente</h2>
+                <span class="close-button">&times;</span>
+            </div>
+            <form id="customer-form">
+                <input type="hidden" id="customer-id">
+                <div class="form-group">
+                    <label for="customer-name">Nome Completo</label>
+                    <input type="text" id="customer-name-form" required>
+                </div>
+                <div class="form-group">
+                    <label for="customer-phone">Telefone</label>
+                    <input type="text" id="customer-phone-form">
+                </div>
+                <div class="form-group">
+                    <label for="customer-document">CPF/CNPJ</label>
+                    <input type="text" id="customer-document-form">
+                </div>
+                <div class="form-group">
+                    <label for="customer-address">Endereço</label>
+                    <input type="text" id="customer-address-form">
+                </div>
+                <div style="text-align: right;">
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const SUPABASE_URL = 'https://jsnrvkmdogvbqjxwjyzc.supabase.co';
+            const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzbnJ2a21kb2d2YnFqeHdqeXpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc2OTcxNTksImV4cCI6MjA3MzI3MzE1OX0.cMEwu00R5bJwWOlY-CKts05gk_1dRQ-NSOTUdnKTWgQ';
+            const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                window.location.href = 'index.html';
+                return;
+            }
+            document.getElementById('user-display').textContent = session.user.email;
+
+            document.getElementById('logout-btn').addEventListener('click', async (e) => {
+                e.preventDefault();
+                await supabase.auth.signOut();
+                window.location.href = 'index.html';
+            });
+
+            let customersData = [];
+            const customersGrid = document.getElementById('customers-grid-container');
+            const searchInput = document.getElementById('search-customer');
+
+            const historyModal = document.getElementById('purchase-history-modal');
+            const historyModalTitle = document.getElementById('history-modal-title');
+            const historyTbody = document.getElementById('purchase-history-tbody');
+            const historyCloseBtn = historyModal.querySelector('.close-button');
+
+            const customerModal = document.getElementById('customer-modal');
+            const customerForm = document.getElementById('customer-form');
+            const customerModalTitle = document.getElementById('customer-modal-title');
+            const addCustomerBtn = document.getElementById('add-customer-btn');
+            const customerCloseBtn = customerModal.querySelector('.close-button');
+
+
+            const formatCurrency = value => (value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            const formatDate = dateStr => new Date(dateStr).toLocaleDateString('pt-BR');
+
+            const fetchAndProcessData = async () => {
+                const { data: customers, error: cError } = await supabase.from('customers').select('*');
+                const { data: sales, error: sError } = await supabase.from('sales').select('*, sale_items(*)');
+
+                if (cError || sError) {
+                    console.error("Erro ao buscar dados:", cError || sError);
+                    return [];
+                }
+
+                const salesByCustomer = sales.reduce((acc, sale) => {
+                    const key = sale.customer_document || sale.customer_phone || sale.customer_name;
+                    if (!acc[key]) {
+                        acc[key] = { totalSpent: 0, lastPurchase: '1970-01-01', purchases: [] };
+                    }
+                    acc[key].totalSpent += sale.total_amount;
+                    if (new Date(sale.created_at) > new Date(acc[key].lastPurchase)) {
+                        acc[key].lastPurchase = sale.created_at;
+                    }
+                    acc[key].purchases.push(sale);
+                    return acc;
+                }, {});
+
+                customersData = customers.map(customer => {
+                    const key = customer.document || customer.phone || customer.name;
+                    return { ...customer, ...salesByCustomer[key] };
+                });
+
+                return customersData;
+            };
+
+            const renderCustomerCards = (filteredCustomers) => {
+                customersGrid.innerHTML = '';
+                if (!filteredCustomers || filteredCustomers.length === 0) {
+                    customersGrid.innerHTML = `<p>Nenhum cliente encontrado.</p>`;
+                    return;
+                }
+
+                filteredCustomers.sort((a, b) => (b.totalSpent || 0) - (a.totalSpent || 0)).forEach(customer => {
+                    const card = document.createElement('div');
+                    card.className = 'customer-card';
+                    card.innerHTML = `
+                        <div class="customer-card-header">
+                            <div class="icon"><i class="fas fa-user"></i></div>
+                            <h3>${customer.name}</h3>
+                        </div>
+                        <ul class="customer-contact-info">
+                            ${customer.phone ? `<li><i class="fas fa-phone"></i> ${customer.phone}</li>` : ''}
+                            ${customer.document ? `<li><i class="fas fa-id-card"></i> ${customer.document}</li>` : ''}
+                        </ul>
+                        <div class="customer-card-kpis">
+                            <div class="kpi">
+                                <div class="value">${formatCurrency(customer.totalSpent)}</div>
+                                <div class="label">Total Comprado</div>
+                            </div>
+                            <div class="kpi">
+                                <div class="value">${customer.lastPurchase === '1970-01-01' ? 'N/A' : formatDate(customer.lastPurchase)}</div>
+                                <div class="label">Última Compra</div>
+                            </div>
+                        </div>
+                        <div class="customer-card-footer">
+                            <button class="btn btn-info edit-customer-btn" data-customer-id="${customer.id}"><i class="fas fa-edit"></i> Editar</button>
+                            <button class="btn btn-secondary view-history-btn" data-customer-id="${customer.id}">Ver Histórico</button>
+                        </div>
+                    `;
+                    customersGrid.appendChild(card);
+                });
+            };
+
+            const openHistoryModal = (customerId) => {
+                const customer = customersData.find(c => c.id === customerId);
+                if (!customer || !customer.purchases) {
+                    historyTbody.innerHTML = '<tr><td colspan="3">Nenhuma compra encontrada.</td></tr>';
+                } else {
+                    historyModalTitle.textContent = `Histórico de Compras de ${customer.name}`;
+                    historyTbody.innerHTML = customer.purchases.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).map(p => `
+                        <tr>
+                            <td>${new Date(p.created_at).toLocaleString('pt-BR')}</td>
+                            <td>${formatCurrency(p.total_amount)}</td>
+                            <td>${p.sale_items.map(item => `${item.quantity}x ${item.product_name}`).join('<br>')}</td>
+                        </tr>
+                    `).join('');
+                }
+                historyModal.style.display = 'flex';
+            };
+
+            const openCustomerModal = (customer = {}) => {
+                customerForm.reset();
+                customerModalTitle.textContent = customer.id ? 'Editar Cliente' : 'Novo Cliente';
+                document.getElementById('customer-id').value = customer.id || '';
+                document.getElementById('customer-name-form').value = customer.name || '';
+                document.getElementById('customer-phone-form').value = customer.phone || '';
+                document.getElementById('customer-document-form').value = customer.document || '';
+                document.getElementById('customer-address-form').value = customer.address || '';
+                customerModal.style.display = 'flex';
+            };
+
+            const handleCustomerFormSubmit = async (e) => {
+                e.preventDefault();
+                const id = document.getElementById('customer-id').value;
+                const customerData = {
+                    name: document.getElementById('customer-name-form').value,
+                    phone: document.getElementById('customer-phone-form').value,
+                    document: document.getElementById('customer-document-form').value,
+                    address: document.getElementById('customer-address-form').value,
+                };
+
+                let response;
+                if (id) {
+                    response = await supabase.from('customers').update(customerData).eq('id', id);
+                } else {
+                    response = await supabase.from('customers').insert([customerData]);
+                }
+
+                if (response.error) {
+                    alert('Erro ao salvar cliente: ' + response.error.message);
+                } else {
+                    customerModal.style.display = 'none';
+                    await init();
+                }
+            };
+
+            searchInput.addEventListener('input', () => {
+                const searchTerm = searchInput.value.toLowerCase();
+                const filtered = customersData.filter(c =>
+                    (c.name && c.name.toLowerCase().includes(searchTerm)) ||
+                    (c.phone && c.phone.includes(searchTerm)) ||
+                    (c.document && c.document.includes(searchTerm))
+                );
+                renderCustomerCards(filtered);
+            });
+
+            customersGrid.addEventListener('click', (e) => {
+                const historyBtn = e.target.closest('.view-history-btn');
+                const editBtn = e.target.closest('.edit-customer-btn');
+
+                if (historyBtn) {
+                    openHistoryModal(Number(historyBtn.dataset.customerId));
+                }
+                if (editBtn) {
+                    const customer = customersData.find(c => c.id === Number(editBtn.dataset.customerId));
+                    openCustomerModal(customer);
+                }
+            });
+
+            addCustomerBtn.addEventListener('click', () => openCustomerModal());
+
+            historyCloseBtn.addEventListener('click', () => historyModal.style.display = 'none');
+            historyModal.addEventListener('click', e => { if (e.target === historyModal) historyModal.style.display = 'none'; });
+
+            customerCloseBtn.addEventListener('click', () => customerModal.style.display = 'none');
+            customerModal.addEventListener('click', e => { if (e.target === customerModal) customerModal.style.display = 'none'; });
+            customerForm.addEventListener('submit', handleCustomerFormSubmit);
+
+
+            const init = async () => {
+                const data = await fetchAndProcessData();
+                renderCustomerCards(data);
+            };
+
+            init();
+        });
+    </script>
+</body>
+
+</html>

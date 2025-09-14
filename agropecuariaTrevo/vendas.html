@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AgroTrevo | Vendas</title>
-    <link rel="shortcut icon" href="img/trevo.png" type="image/x-icon">
+    <link rel="shortcut icon" href="https://img.icons8.com/office/16/clover.png" type="image/x-icon">
     <!-- Google Fonts: Poppins para uma aparência moderna -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Font Awesome para ícones -->
@@ -300,11 +300,10 @@
         }
 
         .product-search-results {
-            max-height: 300px;
+            max-height: 140px;
             overflow-y: auto;
             border: 1px solid var(--border-color);
             border-radius: 6px;
-            margin-bottom: 10vh;
         }
 
         .product-search-item {
@@ -387,6 +386,7 @@
             <a href="estoque.html"><i class="fas fa-boxes-stacked"></i> Estoque</a>
             <a href="fornecedores.html"><i class="fas fa-truck-field"></i> Fornecedores</a>
             <a href="vendas.html" class="active"><i class="fas fa-cash-register"></i> Vendas</a>
+            <a href="clientes.html"><i class="fas fa-users"></i> Clientes</a>
             <a href="relatorios.html"><i class="fas fa-file-alt"></i> Relatórios</a>
             <a href="configuracoes.html"><i class="fas fa-cog"></i> Configurações</a>
         </nav>
@@ -629,13 +629,30 @@
                 }
             };
 
+            const upsertCustomer = async (customerData) => {
+                if (!customerData.name || customerData.name === 'Consumidor Final' || !customerData.document) {
+                    return; // Não salva clientes sem nome ou sem documento
+                }
+                const { error } = await supabase.from('customers').upsert(
+                    {
+                        document: customerData.document,
+                        name: customerData.name,
+                        phone: customerData.phone,
+                        address: customerData.address
+                    },
+                    { onConflict: 'document' }
+                );
+                if (error) console.error('Erro ao salvar cliente:', error);
+            };
+
             const handleFinalizeSale = async () => {
                 if (currentCart.length === 0) return alert('Adicione produtos à venda.');
                 finalizeSaleBtn.disabled = true;
                 finalizeSaleBtn.textContent = 'Processando...';
 
                 const total_amount = currentCart.reduce((sum, item) => sum + (item.quantity * item.price), 0);
-                const customerData = {
+
+                const saleData = {
                     customer_name: document.getElementById('customer-name').value || 'Consumidor Final',
                     customer_phone: document.getElementById('customer-phone').value,
                     customer_document: document.getElementById('customer-document').value,
@@ -643,10 +660,18 @@
                     total_amount
                 };
 
-                const { data: saleData, error: saleError } = await supabase.from('sales').insert(customerData).select().single();
+                // Salva os dados do cliente na tabela customers
+                await upsertCustomer({
+                    name: saleData.customer_name,
+                    phone: saleData.customer_phone,
+                    document: saleData.customer_document,
+                    address: saleData.customer_address
+                });
+
+                const { data: newSale, error: saleError } = await supabase.from('sales').insert(saleData).select().single();
                 if (saleError) return alert('Erro ao registrar venda: ' + saleError.message);
 
-                const sale_id = saleData.id;
+                const sale_id = newSale.id;
                 const itemsToInsert = currentCart.map(item => ({
                     sale_id, product_id: item.id, quantity: item.quantity, unit_price: item.price, product_name: item.name
                 }));
