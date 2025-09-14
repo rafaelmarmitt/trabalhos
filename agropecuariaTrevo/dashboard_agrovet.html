@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgroTrevo | Dashboard</title>
+   <title>AgroTrevo | Dashboard</title>
     <link rel="shortcut icon" href="img/trevo.png" type="image/x-icon">
     <!-- Google Fonts: Poppins para uma aparência moderna -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -557,12 +557,14 @@
         }
 
         .btn-secondary {
-            background-color: var(--secondary);
+            background-color: var(--danger);
             color: white;
+            margin-right: 20px;
         }
 
         .btn-secondary:hover {
-            background-color: #558b2f;
+            color: white;
+            background-color: #690101;
         }
     </style>
 </head>
@@ -755,7 +757,7 @@
                 <div class="form-group"><label>Tipo de Ajuste <span class="required">*</span></label>
                     <div style="display: flex; gap: 20px;"><label><input type="radio" name="adjustment-type"
                                 value="entry" checked> Entrada</label><label><input type="radio" name="adjustment-type"
-                                value="sale"> Saída (Venda)</label></div>
+                                value="sale"> **NÃO USAR**</label></div>
                 </div>
                 <div class="modal-footer"><button type="button"
                         class="btn btn-secondary close-button">Cancelar</button><button type="submit"
